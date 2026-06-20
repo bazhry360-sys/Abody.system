@@ -237,10 +237,14 @@ nav{flex:1;padding:8px 7px;}
 .f select option{background:#fff;}
 .f textarea{resize:vertical;min-height:72px;}
 .rg{display:flex;gap:9px;}
+.rg4{display:flex;gap:9px;flex-wrap:wrap;}
+.rg4 .ro{flex:1 1 calc(50% - 5px);min-width:140px;}
 .ro{flex:1;border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:all .2s;font-size:13px;font-weight:700;color:var(--muted);background:var(--bg);}
 .ro input{display:none;}
 .ro.ok{border-color:var(--green);background:var(--gbg);color:var(--green);}
 .ro.ms{border-color:var(--red);background:var(--rbg);color:var(--red);}
+.ro.rv{border-color:#2d4a3e;background:rgba(45,74,62,0.08);color:#2d4a3e;}
+.ro.cs{border-color:#b07d2e;background:rgba(176,125,46,0.1);color:#b07d2e;}
 .fa{display:flex;gap:10px;padding:13px 17px;border-top:1px solid var(--border);justify-content:flex-end;background:var(--bg);}
 
 /* SHORTAGE ITEMS */
@@ -519,13 +523,13 @@ tbody tr:hover{background:var(--bg3);}
                   <button onclick="genRef()" type="button" style="font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:8px;background:var(--pl);color:var(--primary);border:1px solid rgba(45,74,62,.2);cursor:pointer;white-space:nowrap">🔄 توليد</button>
                 </div></div>
               <div class="f"><label>تاريخ الطلب *</label><input type="date" id="o-d"></div>
-              <div class="f full"><label>📝 موقف العميل</label><input type="text" id="o-cs" placeholder="مثال: العميل طلب تأجيل التسليم لبكرة..."></div>
               <div class="f full"><label>🗒️ ملاحظات</label><input type="text" id="o-gn" placeholder="ملاحظات إضافية..."></div>
               <div class="f full"><label>حالة التسليم *</label>
-                <div class="rg">
+                <div class="rg rg4">
                   <label class="ro" id="ro-ok" onclick="setSt('ok')"><input type="radio">✅ تم التسليم</label>
                   <label class="ro" id="ro-rv" onclick="setSt('review')"><input type="radio">🔍 تحت المراجعة</label>
                   <label class="ro" id="ro-ms" onclick="setSt('missing')"><input type="radio">⚠️ يوجد نواقص</label>
+                  <label class="ro" id="ro-cs" onclick="setSt('cstatus')"><input type="radio">📝 موقف العميل</label>
                 </div>
               </div>
             </div>
@@ -1370,6 +1374,8 @@ function updateBadge(){
 function setSt(s){
   const rvEl = document.getElementById('ro-rv');
   if(rvEl) rvEl.className='ro'+(s==='review'?' rv':'');
+  const csEl = document.getElementById('ro-cs');
+  if(csEl) csEl.className='ro'+(s==='cstatus'?' cs':'');
   oSt=s;
   document.getElementById('ro-ok').className='ro'+(s==='ok'?' ok':'');
   document.getElementById('ro-ms').className='ro'+(s==='missing'?' ms':'');
@@ -1456,7 +1462,7 @@ async function saveAS(){
   try{
     await db.collection('orders').add({
       rep:who||'مستودع', co:who||'نواقص مستودع', num:'', date,
-      gnote:'', cstatus:'', status:'missing', source:'warehouse',
+      gnote:'', status:'missing', source:'warehouse',
       shorts, imgs:[], createdAt:new Date().toISOString()
     });
     addLog(`إضافة نواقص مستودع${who?': '+who:''}`,'order');
@@ -1509,7 +1515,6 @@ async function saveO(){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
-  const cstatus=document.getElementById('o-cs').value.trim();
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول وتحديد حالة التسليم',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
@@ -1524,7 +1529,7 @@ async function saveO(){
   if(stillUploading){showT('⏳ انتظر حتى تنتهي رفع الصور',true);return;}
   if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
   try{
-    await db.collection('orders').add({rep,co,num,date,gnote,cstatus,status:oSt,shorts,imgs:[...imgs],createdAt:new Date().toISOString()});
+    await db.collection('orders').add({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],createdAt:new Date().toISOString()});
     addLog(`إضافة طلب: ${co} — ${rep}`,'order');
     clrO();showT('✅ تم حفظ الطلب في قاعدة البيانات');
   }catch(err){showT('❌ خطأ في الحفظ: '+err.message,true);}
@@ -1534,12 +1539,12 @@ function clrO(){
   document.getElementById('o-c').value='';
   document.getElementById('o-n').value='';
   document.getElementById('o-gn').value='';
-  document.getElementById('o-cs').value='';
   document.getElementById('o-d').value=new Date().toISOString().split('T')[0];
   oSt='';imgs=[];
   document.getElementById('ro-ok').className='ro';
   const rvEl2=document.getElementById('ro-rv'); if(rvEl2) rvEl2.className='ro';
   document.getElementById('ro-ms').className='ro';
+  const csEl2=document.getElementById('ro-cs'); if(csEl2) csEl2.className='ro';
   document.getElementById('ssec').classList.remove('on');
   document.getElementById('sItems').innerHTML='';
   document.getElementById('iPrev').innerHTML='';
@@ -1548,6 +1553,7 @@ function clrO(){
 function ob(s){
   if(s==='ok') return '<span class="badge bgg">✅ تسليم</span>';
   if(s==='review') return '<span class="badge" style="background:rgba(45,74,62,0.1);color:#2d4a3e;border:1px solid rgba(45,74,62,0.2)">🔍 مراجعة</span>';
+  if(s==='cstatus') return '<span class="badge" style="background:rgba(176,125,46,0.1);color:#b07d2e;border:1px solid rgba(176,125,46,0.2)">📝 موقف العميل</span>';
   return '<span class="badge bgd">⚠️ نواقص</span>';
 }
 function daysAgoLbl(dateStr){
@@ -1572,11 +1578,10 @@ function rO(){
   if(em)em.style.display='none';
   tb.innerHTML=d.map((o,i)=>{
     const itemNotes2=(o.shorts?.map(s=>s.note).filter(Boolean))||[];
-    const notesTxt=o.cstatus||'';
-    const tipTxt=[o.cstatus,o.gnote,...itemNotes2].filter(Boolean).join('، ');
+    const notesTxt=[o.gnote,...itemNotes2].filter(Boolean).join('، ');
     return `<tr>
     <td style="font-size:12px;color:var(--muted)">${o.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${daysAgoLbl(o.date)}</div></td>
-    <td style="font-size:12px;max-width:160px;font-weight:${notesTxt?'700':'400'};color:${o.status==='missing'?'#dc2626':o.status==='review'?'#d97706':o.status==='ok'?'#059669':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${tipTxt.replace(/"/g,'&quot;')}">${notesTxt||'—'}</td>
+    <td style="font-size:12px;max-width:160px;font-weight:${notesTxt?'700':'400'};color:${o.status==='missing'?'#dc2626':o.status==='review'?'#d97706':o.status==='ok'?'#059669':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${notesTxt.replace(/"/g,'&quot;')}">${notesTxt||'—'}</td>
     <td><strong>${o.rep}</strong></td><td>${o.co}</td>
     <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--primary)">${o.num||'—'}</td>
     <td>${ob(o.status)}</td>
@@ -1597,7 +1602,6 @@ function vO(id){
     <div class="mdr"><div class="lb">المرجع</div><span style="font-family:'IBM Plex Mono',monospace;color:var(--primary)">${o.num||'—'}</span></div>
     <div class="mdr"><div class="lb">التاريخ</div>${o.date}</div>
     <div class="mdr"><div class="lb">الحالة</div>${ob(o.status)}</div>
-    ${o.cstatus?`<div class="mdr"><div class="lb">موقف العميل</div>${o.cstatus}</div>`:''}
     ${o.gnote?`<div class="mdr"><div class="lb">ملاحظات</div>${o.gnote}</div>`:''}
     ${o.shorts?.length?`<div style="margin-top:13px;padding:12px;background:var(--rbg);border-radius:10px;border:1px solid rgba(220,38,38,.12)">
       <div style="font-weight:800;color:var(--red);margin-bottom:9px;font-size:13px">⚠️ النواقص</div>
@@ -2454,8 +2458,8 @@ function exportXL(type){
 function printDailyReport(){
   const dt=document.getElementById('od')?.value || new Date().toISOString().split('T')[0];
   const dayOrders=orders.filter(o=>o.date===dt);
-  const stLbl={ok:'تم التسليم',review:'تحت المراجعة',missing:'نواقص'};
-  const stColor={ok:'#059669',review:'#d97706',missing:'#dc2626'};
+  const stLbl={ok:'تم التسليم',review:'تحت المراجعة',missing:'نواقص',cstatus:'موقف العميل'};
+  const stColor={ok:'#059669',review:'#d97706',missing:'#dc2626',cstatus:'#b07d2e'};
 
   // ترتيب حسب المندوب — كل مندوب وطلباته ورا بعض
   const sorted=[...dayOrders].sort((a,b)=>(a.rep||'').localeCompare(b.rep||'','ar'));
@@ -2466,7 +2470,7 @@ function printDailyReport(){
     sn++;
     const isNewRep = i===0 || sorted[i-1].rep!==o.rep;
     const itemNotes=(o.shorts?.map(s=>s.note).filter(Boolean))||[];
-    const notes=[o.cstatus, o.gnote, ...itemNotes].filter(Boolean).join('، ');
+    const notes=[o.gnote, ...itemNotes].filter(Boolean).join('، ');
     return {sn,rep:o.rep,co:o.co,st:stLbl[o.status]||o.status,stColor:stColor[o.status]||'#000',date:o.date,notes,isNewRep};
   });
 
@@ -2484,7 +2488,7 @@ function printDailyReport(){
     @media print{body{padding:6px;}}
   </style></head><body>
   <table><thead><tr>
-    <th>م</th><th>اسم المندوب</th><th>الشركة</th><th>حالة الطلب</th><th>التاريخ</th><th>موقف العميل</th>
+    <th>م</th><th>اسم المندوب</th><th>الشركة</th><th>حالة الطلب</th><th>التاريخ</th><th>ملاحظات</th>
   </tr></thead><tbody>
   ${rows.map(r=>`<tr class="${r.isNewRep?'new-rep':''}">
     <td>${r.sn}</td>
@@ -2606,7 +2610,6 @@ function editO(id){
   document.getElementById('o-n').value=o.num||'';
   document.getElementById('o-d').value=o.date||'';
   document.getElementById('o-gn').value=o.gnote||'';
-  document.getElementById('o-cs').value=o.cstatus||'';
   setSt(o.status||'ok');
   // Fill shorts
   document.getElementById('sItems').innerHTML='';
@@ -2636,7 +2639,6 @@ async function updateO(id){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
-  const cstatus=document.getElementById('o-cs').value.trim();
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
@@ -2645,7 +2647,7 @@ async function updateO(id){
     if(name)shorts.push({name,shad:ins[1].value.trim(),qty:ins[2].value.trim(),note:ins[3].value.trim()});
   });
   try{
-    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,cstatus,status:oSt,shorts,imgs:[...imgs],updatedAt:new Date().toISOString()});
+    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],updatedAt:new Date().toISOString()});
     addLog(`تعديل طلب: ${co} — ${rep}`,'order');
     clrO();
     window._editOrderId=null;
