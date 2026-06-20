@@ -237,10 +237,14 @@ nav{flex:1;padding:8px 7px;}
 .f select option{background:#fff;}
 .f textarea{resize:vertical;min-height:72px;}
 .rg{display:flex;gap:9px;}
+.rg4{display:flex;gap:9px;flex-wrap:wrap;}
+.rg4 .ro{flex:1 1 calc(50% - 5px);min-width:140px;}
 .ro{flex:1;border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:center;transition:all .2s;font-size:13px;font-weight:700;color:var(--muted);background:var(--bg);}
 .ro input{display:none;}
 .ro.ok{border-color:var(--green);background:var(--gbg);color:var(--green);}
 .ro.ms{border-color:var(--red);background:var(--rbg);color:var(--red);}
+.ro.rv{border-color:#2d4a3e;background:rgba(45,74,62,0.08);color:#2d4a3e;}
+.ro.cs{border-color:#b07d2e;background:rgba(176,125,46,0.1);color:#b07d2e;}
 .fa{display:flex;gap:10px;padding:13px 17px;border-top:1px solid var(--border);justify-content:flex-end;background:var(--bg);}
 
 /* SHORTAGE ITEMS */
@@ -519,7 +523,14 @@ tbody tr:hover{background:var(--bg3);}
                   <button onclick="genRef()" type="button" style="font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:8px;background:var(--pl);color:var(--primary);border:1px solid rgba(45,74,62,.2);cursor:pointer;white-space:nowrap">🔄 توليد</button>
                 </div></div>
               <div class="f"><label>تاريخ الطلب *</label><input type="date" id="o-d"></div>
-              <div class="f full"><label>📝 موقف العميل</label><input type="text" id="o-cs" placeholder="مثال: العميل طلب تأجيل التسليم لبكرة..."></div>
+              <div class="f full"><label>📝 موقف العميل</label>
+                <div class="rg rg4">
+                  <label class="ro" id="rc-ok" onclick="setCs('ok')"><input type="radio">✅ تم التسليم</label>
+                  <label class="ro" id="rc-rv" onclick="setCs('review')"><input type="radio">🔍 تحت المراجعة</label>
+                  <label class="ro" id="rc-ms" onclick="setCs('missing')"><input type="radio">⚠️ نواقص</label>
+                  <label class="ro" id="rc-cs" onclick="setCs('cstatus')"><input type="radio">📝 موقف العميل</label>
+                </div>
+              </div>
               <div class="f full"><label>🗒️ ملاحظات</label><input type="text" id="o-gn" placeholder="ملاحظات إضافية..."></div>
               <div class="f full"><label>حالة التسليم *</label>
                 <div class="rg">
@@ -1091,7 +1102,7 @@ const USERS = {
 
 let CU = null;
 let orders = [], ships = [], notes = [];
-let imgs = [], oSt = '';
+let imgs = [], oSt = '', oCs = '';
 
 // ===== REALTIME LISTENERS =====
 let unsubOrders, unsubShips, unsubNotes, unsubLog;
@@ -1377,6 +1388,16 @@ function setSt(s){
   if(s==='missing'){sec.classList.add('on');if(!document.querySelectorAll('.si-row').length)addSI();}
   else sec.classList.remove('on');
 }
+function setCs(s){
+  oCs=s;
+  const rcRv=document.getElementById('rc-rv');
+  if(rcRv) rcRv.className='ro'+(s==='review'?' rv':'');
+  const rcCs=document.getElementById('rc-cs');
+  if(rcCs) rcCs.className='ro'+(s==='cstatus'?' cs':'');
+  document.getElementById('rc-ok').className='ro'+(s==='ok'?' ok':'');
+  document.getElementById('rc-ms').className='ro'+(s==='missing'?' ms':'');
+}
+const CS_LBL={ok:'✅ تم التسليم',review:'🔍 تحت المراجعة',missing:'⚠️ نواقص',cstatus:'📝 موقف العميل'};
 function addSI(){
   const d=document.createElement('div');d.className='si-row';
   d.innerHTML=`<input type="text" placeholder="اسم الصنف — مثال: ماء نوفا" onpaste="handleSIPaste(event,this)"><input type="text" placeholder="24" style="text-align:center"><input type="number" placeholder="0" min="0" style="text-align:center"><input type="text" placeholder="ملاحظة"><button class="btn-rm" onclick="this.parentElement.remove()">✕</button>`;
@@ -1509,7 +1530,7 @@ async function saveO(){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
-  const cstatus=document.getElementById('o-cs').value.trim();
+  const cstatus=oCs;
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول وتحديد حالة التسليم',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
@@ -1534,12 +1555,15 @@ function clrO(){
   document.getElementById('o-c').value='';
   document.getElementById('o-n').value='';
   document.getElementById('o-gn').value='';
-  document.getElementById('o-cs').value='';
   document.getElementById('o-d').value=new Date().toISOString().split('T')[0];
-  oSt='';imgs=[];
+  oSt='';oCs='';imgs=[];
   document.getElementById('ro-ok').className='ro';
   const rvEl2=document.getElementById('ro-rv'); if(rvEl2) rvEl2.className='ro';
   document.getElementById('ro-ms').className='ro';
+  document.getElementById('rc-ok').className='ro';
+  const rcRv2=document.getElementById('rc-rv'); if(rcRv2) rcRv2.className='ro';
+  document.getElementById('rc-ms').className='ro';
+  const rcCs2=document.getElementById('rc-cs'); if(rcCs2) rcCs2.className='ro';
   document.getElementById('ssec').classList.remove('on');
   document.getElementById('sItems').innerHTML='';
   document.getElementById('iPrev').innerHTML='';
@@ -1572,8 +1596,8 @@ function rO(){
   if(em)em.style.display='none';
   tb.innerHTML=d.map((o,i)=>{
     const itemNotes2=(o.shorts?.map(s=>s.note).filter(Boolean))||[];
-    const notesTxt=o.cstatus||'';
-    const tipTxt=[o.cstatus,o.gnote,...itemNotes2].filter(Boolean).join('، ');
+    const notesTxt=o.cstatus?CS_LBL[o.cstatus]:'';
+    const tipTxt=[notesTxt,o.gnote,...itemNotes2].filter(Boolean).join('، ');
     return `<tr>
     <td style="font-size:12px;color:var(--muted)">${o.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${daysAgoLbl(o.date)}</div></td>
     <td style="font-size:12px;max-width:160px;font-weight:${notesTxt?'700':'400'};color:${o.status==='missing'?'#dc2626':o.status==='review'?'#d97706':o.status==='ok'?'#059669':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${tipTxt.replace(/"/g,'&quot;')}">${notesTxt||'—'}</td>
@@ -1597,7 +1621,7 @@ function vO(id){
     <div class="mdr"><div class="lb">المرجع</div><span style="font-family:'IBM Plex Mono',monospace;color:var(--primary)">${o.num||'—'}</span></div>
     <div class="mdr"><div class="lb">التاريخ</div>${o.date}</div>
     <div class="mdr"><div class="lb">الحالة</div>${ob(o.status)}</div>
-    ${o.cstatus?`<div class="mdr"><div class="lb">موقف العميل</div>${o.cstatus}</div>`:''}
+    ${o.cstatus?`<div class="mdr"><div class="lb">موقف العميل</div>${CS_LBL[o.cstatus]||o.cstatus}</div>`:''}
     ${o.gnote?`<div class="mdr"><div class="lb">ملاحظات</div>${o.gnote}</div>`:''}
     ${o.shorts?.length?`<div style="margin-top:13px;padding:12px;background:var(--rbg);border-radius:10px;border:1px solid rgba(220,38,38,.12)">
       <div style="font-weight:800;color:var(--red);margin-bottom:9px;font-size:13px">⚠️ النواقص</div>
@@ -2466,7 +2490,8 @@ function printDailyReport(){
     sn++;
     const isNewRep = i===0 || sorted[i-1].rep!==o.rep;
     const itemNotes=(o.shorts?.map(s=>s.note).filter(Boolean))||[];
-    const notes=[o.cstatus, o.gnote, ...itemNotes].filter(Boolean).join('، ');
+    const cstatusLbl=o.cstatus?CS_LBL[o.cstatus]:'';
+    const notes=[cstatusLbl, o.gnote, ...itemNotes].filter(Boolean).join('، ');
     return {sn,rep:o.rep,co:o.co,st:stLbl[o.status]||o.status,stColor:stColor[o.status]||'#000',date:o.date,notes,isNewRep};
   });
 
@@ -2484,7 +2509,7 @@ function printDailyReport(){
     @media print{body{padding:6px;}}
   </style></head><body>
   <table><thead><tr>
-    <th>م</th><th>اسم المندوب</th><th>الشركة</th><th>حالة الطلب</th><th>التاريخ</th><th>موقف العميل</th>
+    <th>م</th><th>اسم المندوب</th><th>الشركة</th><th>حالة الطلب</th><th>التاريخ</th><th>ملاحظات</th>
   </tr></thead><tbody>
   ${rows.map(r=>`<tr class="${r.isNewRep?'new-rep':''}">
     <td>${r.sn}</td>
@@ -2606,7 +2631,7 @@ function editO(id){
   document.getElementById('o-n').value=o.num||'';
   document.getElementById('o-d').value=o.date||'';
   document.getElementById('o-gn').value=o.gnote||'';
-  document.getElementById('o-cs').value=o.cstatus||'';
+  setCs(o.cstatus||'');
   setSt(o.status||'ok');
   // Fill shorts
   document.getElementById('sItems').innerHTML='';
@@ -2636,7 +2661,7 @@ async function updateO(id){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
-  const cstatus=document.getElementById('o-cs').value.trim();
+  const cstatus=oCs;
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
