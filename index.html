@@ -559,7 +559,7 @@ tbody tr:hover{background:var(--bg3);}
             </div>
             <div class="fr">
               <input type="text" id="os" placeholder="🔍 بحث..." oninput="rO()">
-              <select id="of" onchange="rO()"><option value="">كل الحالات</option><option value="ok">تم التسليم</option><option value="review">تحت المراجعة</option><option value="missing">نواقص</option></select>
+              <select id="of" onchange="rO()"><option value="">كل الحالات</option><option value="ok">تم التسليم</option><option value="review">تحت المراجعة</option><option value="missing">نواقص</option><option value="cstatus">العميل موقف</option></select>
               <select id="or2" onchange="rO()"><option value="">كل المناديب</option><option>أحمد العلي</option><option>أحمد عبدالرحمن</option><option>حسين عدلي</option><option>صالح باحجاج</option><option>أسامة بامعيبد</option><option>محمود الجبالي</option><option>محمد الجندي</option><option>وليد الدحدحي</option></select>
               <input type="date" id="od" onchange="rO()">
             </div>
@@ -611,7 +611,15 @@ tbody tr:hover{background:var(--bg3);}
           <div class="card">
             <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>بيانات النواقص</div></div>
             <div class="fg">
-              <div class="f"><label>المندوب / العميل <span style="font-size:10px;color:var(--muted);font-weight:600">(اختياري)</span></label><input type="text" id="as-who" placeholder="اتركه فارغاً لو نواقص مستودع عامة"></div>
+              <div class="f"><label>اسم المندوب <span style="font-size:10px;color:var(--muted);font-weight:600">(اختياري)</span></label>
+                <select id="as-rep">
+                  <option value="">— بدون مندوب (نواقص مستودع عامة) —</option>
+                  <option>أحمد العلي</option><option>أحمد عبدالرحمن</option><option>حسين عدلي</option>
+                  <option>صالح باحجاج</option><option>أسامة بامعيبد</option><option>محمود الجبالي</option>
+                  <option>محمد الجندي</option><option>وليد الدحدحي</option>
+                </select>
+              </div>
+              <div class="f"><label>اسم العميل <span style="font-size:10px;color:var(--muted);font-weight:600">(اختياري)</span></label><input type="text" id="as-co" placeholder="اسم العميل أو الشركة (إن وجد)"></div>
               <div class="f"><label>تاريخ التسجيل *</label><input type="date" id="as-d"></div>
             </div>
             <div class="ss on" style="margin-top:14px">
@@ -1576,7 +1584,8 @@ function handleASIPaste(e, firstInput){
   showT(`✅ تم لصق ${lines.length} صف`);
 }
 function clrAS(){
-  document.getElementById('as-who').value='';
+  document.getElementById('as-rep').value='';
+  document.getElementById('as-co').value='';
   document.getElementById('as-d').value=new Date().toISOString().split('T')[0];
   document.getElementById('asItems').innerHTML='';
   addASI();
@@ -1584,7 +1593,8 @@ function clrAS(){
 let isSavingAS=false;
 async function saveAS(){
   if(isSavingAS)return;
-  const who=document.getElementById('as-who').value.trim();
+  const rep=document.getElementById('as-rep').value.trim();
+  const co=document.getElementById('as-co').value.trim();
   const date=document.getElementById('as-d').value;
   if(!date){showT('يرجى تحديد تاريخ التسجيل',true);return;}
   const shorts=[];
@@ -1601,11 +1611,12 @@ async function saveAS(){
   if(asBtn){asBtn.disabled=true;asBtn.style.opacity='.6';asBtn.style.cursor='not-allowed';asBtn.textContent='⏳ جارٍ الحفظ...';}
   try{
     await db.collection('orders').add({
-      rep:who||'مستودع', co:who||'نواقص مستودع', num:'', date,
+      rep:rep||'مستودع', co:co||'نواقص مستودع', num:'', date,
       gnote:'', status:'missing', source:'warehouse',
       shorts, imgs:[], createdAt:new Date().toISOString()
     });
-    addLog(`إضافة نواقص مستودع${who?': '+who:''}`,'order');
+    const label=[rep,co].filter(Boolean).join(' — ');
+    addLog(`إضافة نواقص مستودع${label?': '+label:''}`,'order');
     clrAS();
     showT('✅ تم حفظ النواقص بنجاح');
   }catch(err){showT('❌ خطأ في الحفظ: '+err.message,true);}
@@ -2617,7 +2628,7 @@ function renderLog(logs){
 function exportXL(type){
   let rows=[],fn='';const d=new Date().toLocaleDateString('ar-SA');
   const stLbl2={ok:'تم التسليم',review:'تحت المراجعة',missing:'يوجد نواقص',cstatus:'العميل موقف'};
-  if(type==='orders'){fn=`تقرير_طلبات_المناديب_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','رقم المرجع','حالة الطلب'],...orders.map(o=>[o.date,o.rep,o.co,o.num||'',stLbl2[o.status]||o.status])];}
+  if(type==='orders'){fn=`تقرير_طلبات_المناديب_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','رقم المرجع','حالة الطلب'],...orders.filter(o=>o.source!=='warehouse').map(o=>[o.date,o.rep,o.co,o.num||'',stLbl2[o.status]||o.status])];}
   else if(type==='shorts'){fn=`تقرير_النواقص_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','اسم الصنف','الشد','الكمية (عدد)','ملاحظات']];orders.filter(o=>o.status==='missing').forEach(o=>{o.shorts?.forEach(s=>rows.push([o.date,o.rep,o.co,s.name,s.shad,s.qty,s.note||'']));});}
   else if(type==='ships'){fn=`تقرير_الشحنات_${d}.csv`;rows=[['التاريخ','رقم العميل','اسم العميل','رقم الإذن','الوجهة','مستلم الشحنة','رقم المستلم','اسم الناقل','رقم البوليصة','الطبليات','العنوان الوطني','شهر الفاتورة','حالة التسليم','ملاحظات'],...ships.map(s=>[s.date,s.cn,s.nm,s.pn,s.dest,s.rc,s.rn,s.car,s.bl,palStr(s.pals),s.addr,s.month,SM[s.status]?.l||s.status,s.notes])];}
   else if(type==='report'){fn=`تقرير_الأداء_${d}.csv`;const r={};orders.forEach(o=>{if(!r[o.rep])r[o.rep]={t:0,ok:0,miss:0,review:0,cstatus:0};r[o.rep].t++;if(o.status==='ok')r[o.rep].ok++;else if(o.status==='review')r[o.rep].review++;else if(o.status==='cstatus')r[o.rep].cstatus++;else r[o.rep].miss++;});rows=[['المندوب','إجمالي الطلبات','تم التسليم','تحت المراجعة','نواقص','العميل موقف','نسبة النجاح'],...Object.entries(r).map(([n,d])=>[n,d.t,d.ok,d.review,d.miss,d.cstatus,d.t?Math.round(d.ok/d.t*100)+'%':'0%'])];}
@@ -2630,7 +2641,7 @@ function exportXL(type){
 // ===== تقرير يومي — بسيط بدون أي شعار أو ترويسة، مثل تصدير إكسل =====
 function printDailyReport(){
   const dt=document.getElementById('od')?.value || new Date().toISOString().split('T')[0];
-  const dayOrders=orders.filter(o=>o.date===dt);
+  const dayOrders=orders.filter(o=>o.date===dt&&o.source!=='warehouse');
   const stLbl={ok:'تم التسليم',review:'تحت المراجعة',missing:'نواقص',cstatus:'العميل موقف'};
   const stColor={ok:'#059669',review:'#d97706',missing:'#dc2626',cstatus:'#b91c1c'};
 
