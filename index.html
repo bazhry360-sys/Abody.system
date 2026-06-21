@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>عبودي — إدارة الطلبات والشحنات</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700;900&display=swap');
 :root{
@@ -244,7 +245,7 @@ nav{flex:1;padding:8px 7px;}
 .ro.ok{border-color:var(--green);background:var(--gbg);color:var(--green);}
 .ro.ms{border-color:var(--red);background:var(--rbg);color:var(--red);}
 .ro.rv{border-color:#2d4a3e;background:rgba(45,74,62,0.08);color:#2d4a3e;}
-.ro.cs{border-color:#b07d2e;background:rgba(176,125,46,0.1);color:#b07d2e;}
+.ro.cs{border-color:#b91c1c;background:rgba(185,28,28,0.1);color:#b91c1c;}
 .fa{display:flex;gap:10px;padding:13px 17px;border-top:1px solid var(--border);justify-content:flex-end;background:var(--bg);}
 
 /* SHORTAGE ITEMS */
@@ -445,9 +446,9 @@ tbody tr:hover{background:var(--bg3);}
       <div id="otherLogins" style="margin-top:18px;display:none;">
         <div style="font-size:10px;color:#8a9e94;text-align:center;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;">دخول المستخدمين الآخرين</div>
         <div class="laccs" style="background:#f5f0e8;border:1px solid #ddd3c2;">
-          <div class="lac" onclick="ql('مدير_مبيعات','sales123')"><span class="un">مدير_مبيعات</span><span class="rl">📊 مبيعات</span><span class="ql-btn">دخول</span></div>
-          <div class="lac" onclick="ql('مشتريات','buy123')"><span class="un">مشتريات</span><span class="rl">⚠️ مشتريات</span><span class="ql-btn">دخول</span></div>
-          <div class="lac" onclick="ql('متابعة','follow123')"><span class="un">متابعة</span><span class="rl">👁 متابعة</span><span class="ql-btn">دخول</span></div>
+          <div class="lac" onclick="ql('مدير_مبيعات')"><span class="un">مدير_مبيعات</span><span class="rl">📊 مبيعات</span><span class="ql-btn">دخول</span></div>
+          <div class="lac" onclick="ql('مشتريات')"><span class="un">مشتريات</span><span class="rl">⚠️ مشتريات</span><span class="ql-btn">دخول</span></div>
+          <div class="lac" onclick="ql('متابعة')"><span class="un">متابعة</span><span class="rl">👁 متابعة</span><span class="ql-btn">دخول</span></div>
         </div>
       </div>
       <div style="text-align:center;margin-top:14px;">
@@ -529,7 +530,7 @@ tbody tr:hover{background:var(--bg3);}
                   <label class="ro" id="ro-ok" onclick="setSt('ok')"><input type="radio">✅ تم التسليم</label>
                   <label class="ro" id="ro-rv" onclick="setSt('review')"><input type="radio">🔍 تحت المراجعة</label>
                   <label class="ro" id="ro-ms" onclick="setSt('missing')"><input type="radio">⚠️ يوجد نواقص</label>
-                  <label class="ro" id="ro-cs" onclick="setSt('cstatus')"><input type="radio">📝 موقف العميل</label>
+                  <label class="ro" id="ro-cs" onclick="setSt('cstatus')"><input type="radio">❌ العميل موقف</label>
                 </div>
               </div>
             </div>
@@ -833,7 +834,7 @@ tbody tr:hover{background:var(--bg3);}
           </div>
           <div class="card">
             <div class="ch"><div class="ct"><div class="cd" style="background:var(--gold)"></div>أداء المناديب</div><button class="btn bg bsm" onclick="printMonthlyReport()">🖨️ تقرير شهري</button></div>
-            <div class="tw"><table><thead><tr><th>المندوب</th><th>الطلبات</th><th>تسليم</th><th>نواقص</th><th>نسبة النجاح</th><th>الأداء</th></tr></thead><tbody id="repRp"></tbody></table></div>
+            <div class="tw"><table><thead><tr><th>🏆</th><th>المندوب</th><th>الطلبات</th><th>تسليم</th><th>نواقص</th><th>نسبة النجاح</th><th>الأداء</th></tr></thead><tbody id="repRp"></tbody></table></div>
           </div>
           <div class="dg" style="margin-top:0">
             <div class="card" style="margin:0">
@@ -874,6 +875,7 @@ tbody tr:hover{background:var(--bg3);}
             <div class="ch">
               <div class="ct"><div class="cd" style="background:var(--green)"></div>السجل الكامل</div>
               <div style="display:flex;gap:6px">
+                <button class="btn bp bsm" id="backupBtn" onclick="downloadBackup()">💾 تنزيل نسخة احتياطية</button>
                 <button class="btn bgy bsm" onclick="archiveOldOrders()">📦 أرشفة القديم</button>
                 <button class="btn br bsm" id="clrL" onclick="if(confirm('مسح السجل؟')){db.collection('log').get().then(s=>s.forEach(d=>d.ref.delete()));showT('✅ تم المسح');}">🗑️ مسح</button>
                 <button class="btn bg bsm" onclick="print()">🖨️</button>
@@ -886,6 +888,13 @@ tbody tr:hover{background:var(--bg3);}
         <!-- SETTINGS -->
         <div class="panel" id="p-settings">
           <div class="ph"><h2>الإعدادات</h2><p>إعدادات واتساب والنظام</p><div class="ph-ln"></div></div>
+          <div class="card" style="max-width:540px">
+            <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>💾 النسخة الاحتياطية</div></div>
+            <div style="padding:16px">
+              <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.7">يحفظ كل بيانات النظام (الطلبات، الشحنات، الملاحظات، السجل، الأرشيف) في ملف واحد على جهازك. يُنصح بتنزيل نسخة بشكل دوري احتياطاً من أي خلل أو حذف غير مقصود.</p>
+              <button class="btn bp" id="backupBtnSettings" onclick="downloadBackup()">💾 تنزيل نسخة احتياطية الآن</button>
+            </div>
+          </div>
           <div class="card" style="max-width:540px">
             <div class="ch"><div class="ct"><div class="cd" style="background:var(--green)"></div>أرقام / روابط واتساب</div></div>
             <div style="padding:16px">
@@ -932,6 +941,47 @@ tbody tr:hover{background:var(--bg3);}
           <div class="card">
             <div class="ch"><div class="ct"><div class="cd" style="background:var(--green)"></div>روابط الدخول المباشر</div></div>
             <div style="padding:16px;display:flex;flex-direction:column;gap:10px" id="repLinksWrap"></div>
+          </div>
+        </div>
+
+        <!-- BI DASHBOARD PANEL -->
+        <div class="panel" id="p-bi">
+          <div class="ph"><h2>📊 لوحة المؤشرات</h2><p>نظرة تحليلية شاملة بالرسوم البيانية</p><div class="ph-ln"></div></div>
+
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap">
+            <select id="biPeriod" onchange="renderBI()" style="font-family:'Tajawal',sans-serif;font-size:13px;background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:8px 14px;color:var(--text);outline:none;">
+              <option value="7">آخر 7 أيام</option>
+              <option value="30" selected>آخر 30 يوم</option>
+              <option value="90">آخر 3 أشهر</option>
+              <option value="999">الكل</option>
+            </select>
+            <select id="biGroup" onchange="renderBI()" style="font-family:'Tajawal',sans-serif;font-size:13px;background:var(--bg2);border:1.5px solid var(--border);border-radius:9px;padding:8px 14px;color:var(--text);outline:none;">
+              <option value="day">تجميع يومي</option>
+              <option value="week">تجميع أسبوعي</option>
+            </select>
+          </div>
+
+          <div id="biCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:18px"></div>
+
+          <div class="card" style="margin-bottom:16px">
+            <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>عدد الطلبات عبر الوقت</div></div>
+            <div style="padding:16px;height:280px"><canvas id="biOrdersChart"></canvas></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px">
+            <div class="ch"><div class="ct"><div class="cd" style="background:var(--green)"></div>نسبة التسليم مقابل النواقص عبر الوقت</div></div>
+            <div style="padding:16px;height:280px"><canvas id="biRateChart"></canvas></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:16px">
+            <div class="card" style="margin:0">
+              <div class="ch"><div class="ct"><div class="cd" style="background:var(--blue)"></div>أداء المناديب — مقارنة</div></div>
+              <div style="padding:16px;height:320px"><canvas id="biRepsChart"></canvas></div>
+            </div>
+            <div class="card" style="margin:0">
+              <div class="ch"><div class="ct"><div class="cd" style="background:var(--gold)"></div>توزيع حالات الطلبات</div></div>
+              <div style="padding:16px;height:320px"><canvas id="biStatusChart"></canvas></div>
+            </div>
           </div>
         </div>
 
@@ -1077,21 +1127,26 @@ try {
   console.error('Firebase init error:', e);
 }
 
-// ===== USERS =====
+// ===== USERS ===== (كلمات السر مشفّرة بـ SHA-256 — لا تُقرأ كنص صريح من الكود)
 const USERS = {
-  'عبدالله':        {pass:'55555',    name:'عبدالله',           role:'admin',    rl:'مدير كامل الصلاحيات'},
-  'مدير_مبيعات':   {pass:'sales123',  name:'مدير المبيعات',     role:'sales',    rl:'مدير المبيعات'},
-  'مشتريات':       {pass:'buy123',    name:'مستخدم المشتريات',  role:'purchase', rl:'مشتريات'},
-  'متابعة':        {pass:'follow123', name:'مستخدم المتابعة',   role:'viewer',   rl:'مشاهدة وطباعة'},
-  'احمد_العلي':    {pass:'rep1',      name:'أحمد العلي',        role:'rep',      rl:'مندوب'},
-  'احمد_عبدالرحمن':{pass:'rep2',      name:'أحمد عبدالرحمن',    role:'rep',      rl:'مندوب'},
-  'حسين_عدلي':     {pass:'rep3',      name:'حسين عدلي',         role:'rep',      rl:'مندوب'},
-  'صالح_باحجاج':   {pass:'rep4',      name:'صالح باحجاج',       role:'rep',      rl:'مندوب'},
-  'اسامه_بامعيبد': {pass:'rep5',      name:'أسامة بامعيبد',     role:'rep',      rl:'مندوب'},
-  'محمود_الجبالي': {pass:'rep6',      name:'محمود الجبالي',     role:'rep',      rl:'مندوب'},
-  'محمد_الجندي':   {pass:'rep7',      name:'محمد الجندي',       role:'rep',      rl:'مندوب'},
-  'وليد_الدحدحي':  {pass:'rep8',      name:'وليد الدحدحي',      role:'rep',      rl:'مندوب'},
+  'عبدالله':        {hash:'c507a68f3093e885765257ed3f176c757aaf62bb4cbc2ef94b2e7da3406d9676', name:'عبدالله',           role:'admin',    rl:'مدير كامل الصلاحيات'},
+  'مدير_مبيعات':   {hash:'6bc0a63cb29c92306020c0a6bbc358cc4628db277dc06e253535e126517ad637', name:'مدير المبيعات',     role:'sales',    rl:'مدير المبيعات'},
+  'مشتريات':       {hash:'4c65351ac7ada9d804b715ea520e0cfe4530a42953f7c40ff92c8071eafba6a0', name:'مستخدم المشتريات',  role:'purchase', rl:'مشتريات'},
+  'متابعة':        {hash:'4222494232737848f45675f7962a21e04a5164adb430cb7bd5e977e30ea5e250', name:'مستخدم المتابعة',   role:'viewer',   rl:'مشاهدة وطباعة'},
+  'احمد_العلي':    {hash:'c7976a1305126e1cde54fe002c46b7ffd34ac4cce4f47516527c0351fdba40b5', name:'أحمد العلي',        role:'rep',      rl:'مندوب'},
+  'احمد_عبدالرحمن':{hash:'69d90f2bf89d621ce2b5c745c29b0ca303d04fb4d2360e1b12eb57c0adc223db', name:'أحمد عبدالرحمن',    role:'rep',      rl:'مندوب'},
+  'حسين_عدلي':     {hash:'c39c8a73254d15d3437f88c545450d9c544dac48970f2511f1c674acfdb09c83', name:'حسين عدلي',         role:'rep',      rl:'مندوب'},
+  'صالح_باحجاج':   {hash:'9bf8ca932a51ecb95617638e66aa0d47a0e46c8c0c35a706c642bc92d7bc42c3', name:'صالح باحجاج',       role:'rep',      rl:'مندوب'},
+  'اسامه_بامعيبد': {hash:'08083332a8a6c70aa7028726be5f950c7a44cc4294e1c625b5b8c126e978e24f', name:'أسامة بامعيبد',     role:'rep',      rl:'مندوب'},
+  'محمود_الجبالي': {hash:'933363220117558586266de4fdcfb88ac4376fa85796c93380bf3659af2c83e4', name:'محمود الجبالي',     role:'rep',      rl:'مندوب'},
+  'محمد_الجندي':   {hash:'129191c735d165dea69f28d7beb30764c634162ba5f19ecbc911ad40dd8f3164', name:'محمد الجندي',       role:'rep',      rl:'مندوب'},
+  'وليد_الدحدحي':  {hash:'7d60803437f2d27d716776c616a75a964bb8ddd7160fd1e7e99b8f6aaa475f18', name:'وليد الدحدحي',      role:'rep',      rl:'مندوب'},
 };
+// تشفير SHA-256 باستخدام Web Crypto API المدمجة في المتصفح (بدون مكتبات خارجية)
+async function sha256Hex(text){
+  const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 let CU = null;
 let orders = [], ships = [], notes = [];
@@ -1108,7 +1163,7 @@ function startListeners() {
   // Orders
   let prevOrderCount=0;
   try{
-  unsubOrders = db.collection('orders').orderBy('date','desc').onSnapshot(snap => {
+  unsubOrders = db.collection('orders').orderBy('date','desc').limit(2000).onSnapshot(snap => {
     const newOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
     // Detect new missing orders
     if(prevOrderCount>0&&newOrders.length>prevOrderCount){
@@ -1125,7 +1180,7 @@ function startListeners() {
     updateBadge();
   });
   // Ships
-  unsubShips = db.collection('ships').orderBy('date','desc').onSnapshot(snap => {
+  unsubShips = db.collection('ships').orderBy('date','desc').limit(2000).onSnapshot(snap => {
     ships = snap.docs.map(d => ({id: d.id, ...d.data()}));
     rSp(); rDash();
     checkLateShipments();
@@ -1156,16 +1211,72 @@ function addLog(msg, type='info') {
   db.collection('log').add({msg, type, time: new Date().toISOString(), user: CU ? CU.name : '—'}).catch(()=>{});
 }
 
+// ===== نسخة احتياطية كاملة =====
+// تجلب كل البيانات مباشرة من قاعدة البيانات (وليس من المتغيرات المحلية المحدودة بـ limit)
+// وتحفظها كملف JSON واحد يمكن الاحتفاظ به أو استخدامه لاحقاً لاسترجاع البيانات يدوياً.
+async function downloadBackup(){
+  if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
+  const btns=[document.getElementById('backupBtn'),document.getElementById('backupBtnSettings')].filter(Boolean);
+  const origTxts=btns.map(b=>b.textContent);
+  btns.forEach(b=>{b.disabled=true;b.textContent='⏳ جارٍ التجهيز...';});
+  try{
+    const [ordersSnap, shipsSnap, notesSnap, logSnap, archiveSnap] = await Promise.all([
+      db.collection('orders').get(),
+      db.collection('ships').get(),
+      db.collection('notes').get(),
+      db.collection('log').orderBy('time','desc').limit(500).get(),
+      db.collection('archive').get(),
+    ]);
+    const toArr=snap=>snap.docs.map(d=>({id:d.id,...d.data()}));
+    const backup={
+      app:'عبودي — نظام إدارة الطلبات والشحنات',
+      exportedAt:new Date().toISOString(),
+      exportedBy:CU?CU.name:'—',
+      counts:{orders:ordersSnap.size,ships:shipsSnap.size,notes:notesSnap.size,log:logSnap.size,archive:archiveSnap.size},
+      orders:toArr(ordersSnap),
+      ships:toArr(shipsSnap),
+      notes:toArr(notesSnap),
+      log:toArr(logSnap),
+      archive:toArr(archiveSnap),
+    };
+    const json=JSON.stringify(backup,null,2);
+    const dateStr=new Date().toISOString().split('T')[0];
+    const a=document.createElement('a');
+    a.href='data:application/json;charset=utf-8,'+encodeURIComponent(json);
+    a.download=`نسخة_احتياطية_عبودي_${dateStr}.json`;
+    a.click();
+    addLog(`تنزيل نسخة احتياطية (${ordersSnap.size} طلب، ${shipsSnap.size} شحنة)`,'info');
+    showT(`✅ تم تنزيل النسخة الاحتياطية — ${ordersSnap.size} طلب، ${shipsSnap.size} شحنة`);
+  }catch(err){
+    showT('❌ خطأ أثناء تجهيز النسخة الاحتياطية: '+err.message,true);
+  }finally{
+    btns.forEach((b,i)=>{b.disabled=false;b.textContent=origTxts[i];});
+  }
+}
+
 // ===== CLOCK =====
 function tick(){document.getElementById('clk').textContent=new Date().toLocaleTimeString('ar-SA',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 setInterval(tick,1000); tick();
 
 // ===== LOGIN =====
-function ql(u,p){document.getElementById('lu').value=u;document.getElementById('lp').value=p;login();}
-function login(){
+// دخول مباشر موثوق (روابط المناديب الخاصة + أزرار الدخول السريع) — بدون كتابة كلمة سر
+function loginByUsername(u){
+  const user=USERS[u];
+  if(!user)return;
+  CU={un:u,...user};
+  document.getElementById('lerr').classList.remove('show');
+  document.getElementById('LS').classList.add('hidden');
+  document.getElementById('APP').classList.add('on');
+  initApp();
+  try{addLog(`دخول: ${CU.name}`);}catch(e){}
+}
+function ql(u){loginByUsername(u);}
+async function login(){
   const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value.trim(),er=document.getElementById('lerr');
-  if(USERS[u]&&USERS[u].pass===p){
-    CU={un:u,...USERS[u]};
+  const user=USERS[u];
+  const inputHash = p ? await sha256Hex(p) : '';
+  if(user && user.hash===inputHash){
+    CU={un:u,...user};
     er.classList.remove('show');
     document.getElementById('LS').classList.add('hidden');
     document.getElementById('APP').classList.add('on');
@@ -1229,13 +1340,14 @@ function initNav(){
       {grp:'الرئيسية'},{ic:'📊',n:'dash',lbl:'لوحة التحكم'},
       {grp:'العمليات'},{ic:'📦',n:'orders',lbl:'طلبات المناديب',badge:true},
       {ic:'⚠️',n:'shorts',lbl:'النواقص'},{ic:'➕',n:'addshort',lbl:'إضافة نواقص'},{ic:'📋',n:'shortscur',lbl:'النواقص الحالية'},{ic:'📦',n:'shortsarr',lbl:'الأصناف الواصلة'},{ic:'🧾',n:'shortssum',lbl:'ملخص النواقص'},{ic:'🚚',n:'ships',lbl:'الشحنات'},{ic:'📡',n:'shipview',lbl:'متابعة الشحنات'},
-      {grp:'التقارير'},{ic:'📈',n:'report',lbl:'التقارير'},{ic:'🎯',n:'kpi',lbl:'مؤشرات النواقص'},{ic:'📋',n:'log',lbl:'سجل العمليات'},
+      {grp:'التقارير'},{ic:'📈',n:'report',lbl:'التقارير'},{ic:'📊',n:'bi',lbl:'لوحة المؤشرات'},{ic:'🎯',n:'kpi',lbl:'مؤشرات النواقص'},{ic:'📋',n:'log',lbl:'سجل العمليات'},
       {grp:'الإعدادات'},{ic:'⚙️',n:'settings',lbl:'الإعدادات'},{ic:'🔗',n:'replinks',lbl:'روابط المناديب'},{ic:'👥',n:'managereps',lbl:'إدارة المناديب'},
     ],
     sales: [
       {grp:'الرئيسية'},{ic:'📊',n:'dash',lbl:'لوحة التحكم'},
       {grp:'العمليات'},{ic:'📦',n:'orders',lbl:'طلبات المناديب',badge:true},
       {ic:'⚠️',n:'shorts',lbl:'النواقص'},
+      {grp:'التقارير'},{ic:'📊',n:'bi',lbl:'لوحة المؤشرات'},
       {grp:'المناديب'},{ic:'📝',n:'notes',lbl:'ملاحظات للمناديب'},{ic:'🔗',n:'replinks',lbl:'روابط المناديب'},{ic:'👥',n:'managereps',lbl:'إدارة المناديب'},
     ],
     purchase: [
@@ -1262,7 +1374,7 @@ function initNav(){
 }
 
 // ===== PANELS =====
-const pN={dash:'لوحة التحكم',orders:'طلبات المناديب',shorts:'النواقص',addshort:'إضافة نواقص',shortscur:'النواقص الحالية',shortsarr:'الأصناف الواصلة',shortssum:'ملخص النواقص',ships:'الشحنات',shipview:'متابعة الشحنات',repview:'طلباتي',notes:'ملاحظات للمناديب',report:'التقارير',log:'سجل العمليات',settings:'الإعدادات',replinks:'روابط المناديب',managereps:'إدارة المناديب',kpi:'مؤشرات أداء النواقص'};
+const pN={dash:'لوحة التحكم',orders:'طلبات المناديب',shorts:'النواقص',addshort:'إضافة نواقص',shortscur:'النواقص الحالية',shortsarr:'الأصناف الواصلة',shortssum:'ملخص النواقص',ships:'الشحنات',shipview:'متابعة الشحنات',repview:'طلباتي',notes:'ملاحظات للمناديب',report:'التقارير',bi:'لوحة المؤشرات',log:'سجل العمليات',settings:'الإعدادات',replinks:'روابط المناديب',managereps:'إدارة المناديب',kpi:'مؤشرات أداء النواقص'};
 
 function renderShipViewLinks(){
   const wrap = document.getElementById('shipViewLinksWrap');
@@ -1317,6 +1429,7 @@ function sendRepLink(name,url){
 }
 function gp(n,el){
   if((n==='report'||n==='kpi') && CU.role!=='admin'){showT('🔒 هذه الصفحة للمدير فقط',true);return;}
+  if(n==='bi' && CU.role!=='admin' && CU.role!=='sales'){showT('🔒 هذه الصفحة للمدير والمبيعات فقط',true);return;}
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(x=>x.classList.remove('on'));
   document.getElementById('p-'+n).classList.add('on');
@@ -1326,6 +1439,7 @@ function gp(n,el){
   if(n==='managereps')renderRepsList();
   if(n==='report'){rRep();renderMonthComp();}
   if(n==='kpi')renderKPI();
+  if(n==='bi')renderBI();
   // Purchase: show cards, admin: show table
   if(n==='shipview') svLoad();
   if(n==='shorts'){
@@ -1352,10 +1466,30 @@ function rDash(){
   const miss=orders.filter(o=>o.status==='missing').length;
   const ok=orders.filter(o=>o.status==='ok').length;
   const actS=ships.filter(s=>s.status!=='delivered').length;
+  const oldMiss=orders.filter(o=>o.status==='missing'&&daysAgoNum(o.date)>=SHORT_AGING_DAYS).length;
+
+  // مقارنة بالشهر الماضي (نفس عدد الأيام من بداية الشهر الحالي حتى اليوم)
+  const now=new Date();
+  const startThis=new Date(now.getFullYear(),now.getMonth(),1);
+  const startLast=new Date(now.getFullYear(),now.getMonth()-1,1);
+  const sameDayLast=new Date(now.getFullYear(),now.getMonth()-1,now.getDate());
+  const inRange=(d,a,b)=>{const t=new Date(d+'T00:00:00');return t>=a&&t<=b;};
+  const thisM=orders.filter(o=>inRange(o.date,startThis,now));
+  const lastM=orders.filter(o=>inRange(o.date,startLast,sameDayLast));
+  const trend=(curr,prev)=>{
+    if(!prev)return curr>0?{arrow:'↑',color:'var(--green)',txt:'جديد'}:{arrow:'',color:'var(--muted)',txt:''};
+    const pct=Math.round((curr-prev)/prev*100);
+    if(pct===0)return {arrow:'→',color:'var(--muted)',txt:'بدون تغيير'};
+    return pct>0?{arrow:'↑',color:'var(--red)',txt:`${pct}% عن الشهر الماضي`}:{arrow:'↓',color:'var(--green)',txt:`${Math.abs(pct)}% عن الشهر الماضي`};
+  };
+  const missTrend=trend(thisM.filter(o=>o.status==='missing').length, lastM.filter(o=>o.status==='missing').length);
+  const okTrend=trend(thisM.filter(o=>o.status==='ok').length, lastM.filter(o=>o.status==='ok').length);
+  const totalTrend=trend(thisM.length, lastM.length);
+
   document.getElementById('dSt').innerHTML=`
-    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--pl)">📦</div><span class="sc-tr" style="background:var(--bbg);color:var(--blue)">الكل</span></div><div class="sc-n" style="color:var(--primary)">${orders.length}</div><div class="sc-l">إجمالي الطلبات</div><div class="sc-bar" style="background:linear-gradient(90deg,var(--primary),var(--primary2))"></div></div>
-    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--gbg)">✅</div><span class="sc-tr" style="background:var(--gbg);color:var(--green)">${orders.length?Math.round(ok/orders.length*100):0}%</span></div><div class="sc-n" style="color:var(--green)">${ok}</div><div class="sc-l">تم التسليم</div><div class="sc-bar" style="background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
-    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--rbg)">⚠️</div><span class="sc-tr" style="background:var(--rbg);color:var(--red)">${miss}</span></div><div class="sc-n" style="color:var(--red)">${miss}</div><div class="sc-l">طلبات بنواقص</div><div class="sc-bar" style="background:linear-gradient(90deg,var(--red),#f87171)"></div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--pl)">📦</div><span class="sc-tr" style="background:var(--bbg);color:var(--blue)">الكل</span></div><div class="sc-n" style="color:var(--primary)">${orders.length}</div><div class="sc-l">إجمالي الطلبات</div>${totalTrend.txt?`<div style="font-size:10px;font-weight:700;color:${totalTrend.color};margin-top:2px">${totalTrend.arrow} ${totalTrend.txt}</div>`:''}<div class="sc-bar" style="background:linear-gradient(90deg,var(--primary),var(--primary2))"></div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--gbg)">✅</div><span class="sc-tr" style="background:var(--gbg);color:var(--green)">${orders.length?Math.round(ok/orders.length*100):0}%</span></div><div class="sc-n" style="color:var(--green)">${ok}</div><div class="sc-l">تم التسليم</div>${okTrend.txt?`<div style="font-size:10px;font-weight:700;color:${okTrend.color};margin-top:2px">${okTrend.arrow} ${okTrend.txt}</div>`:''}<div class="sc-bar" style="background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--rbg)">⚠️</div><span class="sc-tr" style="background:var(--rbg);color:var(--red)">${miss}</span></div><div class="sc-n" style="color:var(--red)">${miss}</div><div class="sc-l">طلبات بنواقص</div>${oldMiss>0?`<div style="font-size:10px;font-weight:800;color:#fff;background:#dc2626;display:inline-block;padding:2px 7px;border-radius:8px;margin-top:3px">🔴 ${oldMiss} متأخر +${SHORT_AGING_DAYS} أيام</div>`:missTrend.txt?`<div style="font-size:10px;font-weight:700;color:${missTrend.color};margin-top:2px">${missTrend.arrow} ${missTrend.txt}</div>`:''}<div class="sc-bar" style="background:linear-gradient(90deg,var(--red),#f87171)"></div></div>
     <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--bbg)">🚚</div><span class="sc-tr" style="background:var(--bbg);color:var(--blue)">${actS} نشط</span></div><div class="sc-n" style="color:var(--blue)">${ships.length}</div><div class="sc-l">الشحنات</div><div class="sc-bar" style="background:linear-gradient(90deg,var(--blue),#60a5fa)"></div></div>`;
   const ro=[...orders].slice(0,6), rs=[...ships].slice(0,6);
   document.getElementById('dCd').innerHTML=`
@@ -1447,7 +1581,9 @@ function clrAS(){
   document.getElementById('asItems').innerHTML='';
   addASI();
 }
+let isSavingAS=false;
 async function saveAS(){
+  if(isSavingAS)return;
   const who=document.getElementById('as-who').value.trim();
   const date=document.getElementById('as-d').value;
   if(!date){showT('يرجى تحديد تاريخ التسجيل',true);return;}
@@ -1459,6 +1595,10 @@ async function saveAS(){
   });
   if(!shorts.length){showT('يرجى إدخال الأصناف الناقصة',true);return;}
   if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
+  isSavingAS=true;
+  const asBtn=document.querySelector('[onclick="saveAS()"]');
+  const asBtnTxt=asBtn?asBtn.textContent:'';
+  if(asBtn){asBtn.disabled=true;asBtn.style.opacity='.6';asBtn.style.cursor='not-allowed';asBtn.textContent='⏳ جارٍ الحفظ...';}
   try{
     await db.collection('orders').add({
       rep:who||'مستودع', co:who||'نواقص مستودع', num:'', date,
@@ -1469,6 +1609,10 @@ async function saveAS(){
     clrAS();
     showT('✅ تم حفظ النواقص بنجاح');
   }catch(err){showT('❌ خطأ في الحفظ: '+err.message,true);}
+  finally{
+    isSavingAS=false;
+    if(asBtn){asBtn.disabled=false;asBtn.style.opacity='';asBtn.style.cursor='';asBtn.textContent=asBtnTxt||'💾 حفظ النواقص';}
+  }
 }
 // ضغط الصورة وتحويلها لـ Base64 — بدون Firebase Storage
 function compressImgToBase64(file, maxW=800, quality=0.65){
@@ -1509,7 +1653,9 @@ function handleI(e){
     }catch(err){showT('❌ خطأ في معالجة الصورة: '+err.message,true);}
   });
 }
+let isSavingOrder=false;
 async function saveO(){
+  if(isSavingOrder)return; // منع الحفظ المزدوج عند الضغط أكثر من مرة بسرعة
   const rep=document.getElementById('o-r').value.trim();
   const co=document.getElementById('o-c').value.trim();
   const num=document.getElementById('o-n').value.trim();
@@ -1528,11 +1674,19 @@ async function saveO(){
   const stillUploading=document.querySelectorAll('.img-pw[data-uploading="1"]').length;
   if(stillUploading){showT('⏳ انتظر حتى تنتهي رفع الصور',true);return;}
   if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
+  isSavingOrder=true;
+  const btn=document.querySelector('[onclick="saveO()"]');
+  const btnTxt=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.style.opacity='.6';btn.style.cursor='not-allowed';btn.textContent='⏳ جارٍ الحفظ...';}
   try{
     await db.collection('orders').add({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],createdAt:new Date().toISOString()});
     addLog(`إضافة طلب: ${co} — ${rep}`,'order');
     clrO();showT('✅ تم حفظ الطلب في قاعدة البيانات');
   }catch(err){showT('❌ خطأ في الحفظ: '+err.message,true);}
+  finally{
+    isSavingOrder=false;
+    if(btn){btn.disabled=false;btn.style.opacity='';btn.style.cursor='';btn.textContent=btnTxt||'💾 حفظ الطلب';}
+  }
 }
 function clrO(){
   document.getElementById('o-r').value='';
@@ -1553,7 +1707,7 @@ function clrO(){
 function ob(s){
   if(s==='ok') return '<span class="badge bgg">✅ تسليم</span>';
   if(s==='review') return '<span class="badge" style="background:rgba(45,74,62,0.1);color:#2d4a3e;border:1px solid rgba(45,74,62,0.2)">🔍 مراجعة</span>';
-  if(s==='cstatus') return '<span class="badge" style="background:rgba(176,125,46,0.1);color:#b07d2e;border:1px solid rgba(176,125,46,0.2)">📝 موقف العميل</span>';
+  if(s==='cstatus') return '<span class="badge" style="background:rgba(185,28,28,0.1);color:#b91c1c;border:1px solid rgba(185,28,28,0.2)">❌ العميل موقف</span>';
   return '<span class="badge bgd">⚠️ نواقص</span>';
 }
 function daysAgoLbl(dateStr){
@@ -1566,6 +1720,13 @@ function daysAgoLbl(dateStr){
   if(diff>1)return `منذ ${diff} أيام`;
   return '';
 }
+function daysAgoNum(dateStr){
+  if(!dateStr)return 0;
+  const d1=new Date(dateStr+'T00:00:00');
+  const d2=new Date();d2.setHours(0,0,0,0);
+  return Math.round((d2-d1)/86400000);
+}
+const SHORT_AGING_DAYS=3; // نقص يُعتبر "قديم" بعد هذا العدد من الأيام بدون حل
 function rO(){
   const q=document.getElementById('os')?.value.toLowerCase()||'';
   const f=document.getElementById('of')?.value||'';
@@ -1579,13 +1740,15 @@ function rO(){
   tb.innerHTML=d.map((o,i)=>{
     const itemNotes2=(o.shorts?.map(s=>s.note).filter(Boolean))||[];
     const notesTxt=[o.gnote,...itemNotes2].filter(Boolean).join('، ');
-    return `<tr>
+    const ageNum=daysAgoNum(o.date);
+    const isOldMissing=o.status==='missing'&&ageNum>=SHORT_AGING_DAYS;
+    return `<tr${isOldMissing?' style="background:rgba(220,38,38,0.04)"':''}>
     <td style="font-size:12px;color:var(--muted)">${o.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${daysAgoLbl(o.date)}</div></td>
     <td style="font-size:12px;max-width:160px;font-weight:${notesTxt?'700':'400'};color:${o.status==='missing'?'#dc2626':o.status==='review'?'#d97706':o.status==='ok'?'#059669':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${notesTxt.replace(/"/g,'&quot;')}">${notesTxt||'—'}</td>
     <td><strong>${o.rep}</strong></td><td>${o.co}</td>
     <td style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--primary)">${o.num||'—'}</td>
     <td>${ob(o.status)}</td>
-    <td>${o.shorts?.length?`<span style="color:var(--red);font-weight:700;font-size:12px">${o.shorts.length} صنف</span>`:'<span style="color:var(--muted2)">—</span>'}</td>
+    <td>${o.shorts?.length?`<span style="color:var(--red);font-weight:700;font-size:12px">${o.shorts.length} صنف</span>`:'<span style="color:var(--muted2)">—</span>'}${isOldMissing?`<div style="margin-top:3px"><span style="font-size:10px;font-weight:800;color:#fff;background:#dc2626;padding:2px 7px;border-radius:8px;white-space:nowrap">🔴 متأخر ${ageNum} يوم</span></div>`:''}</td>
     <td style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
       <button class="btn bg bxs" onclick="vO('${o.id}')">👁️</button>
       ${o.status==='missing'?`<button class="btn bwa bxs" onclick="waOrd('${o.id}')">📦</button><button class="btn bwa2 bxs" onclick="waBuy('${o.id}')">⚠️</button>`:''}
@@ -2104,7 +2267,8 @@ function openWa(key,msg){
 }
 function waOrd(id){
   const o=orders.find(x=>x.id===id);if(!o)return;
-  const msg=`📦 *طلب مندوب — عبودي*\n\n👤 المندوب: ${o.rep}\n🏢 العميل: ${o.co}\n📋 المرجع: ${o.num||'—'}\n📅 التاريخ: ${o.date}\nالحالة: ${o.status==='ok'?'✅ تم التسليم':'⚠️ يوجد نواقص'}${o.shorts?.length?'\n\nالنواقص:\n'+o.shorts.map(s=>`• ${s.name} — شد ${s.shad} — عدد ${s.qty}${s.note?' ('+s.note+')':''}`).join('\n'):''}`;
+  const stLblWa={ok:'✅ تم التسليم',review:'🔍 تحت المراجعة',missing:'⚠️ يوجد نواقص',cstatus:'❌ العميل موقف'};
+  const msg=`📦 *طلب مندوب — عبودي*\n\n👤 المندوب: ${o.rep}\n🏢 العميل: ${o.co}\n📋 المرجع: ${o.num||'—'}\n📅 التاريخ: ${o.date}\nالحالة: ${stLblWa[o.status]||o.status}${o.shorts?.length?'\n\nالنواقص:\n'+o.shorts.map(s=>`• ${s.name} — شد ${s.shad} — عدد ${s.qty}${s.note?' ('+s.note+')':''}`).join('\n'):''}`;
   openWa('ord',msg);addLog(`واتساب مناديب — ${o.co}`,'info');
 }
 function waBuy(id){
@@ -2301,14 +2465,14 @@ let dCb=null;
 function dO(id){
   const o=orders.find(x=>x.id===id);
   document.getElementById('cnfT').textContent=`حذف طلب "${o?.co} — ${o?.rep}"؟`;
-  dCb=async()=>{try{await db.collection('orders').doc(id).delete();addLog(`حذف طلب: ${o?.co}`,'delete');showT('✅ تم الحذف');}catch(e){showT('❌ '+e.message,true);}};
+  dCb=async()=>{try{await db.collection('orders').doc(id).delete();addLog(`حذف طلب: ${o?.co} — مندوب: ${o?.rep} — تاريخ: ${o?.date} — رقم: ${o?.num||'—'}`,'delete');showT('✅ تم الحذف');}catch(e){showT('❌ '+e.message,true);}};
   document.getElementById('cnfBtn').onclick=()=>{dCb();closeCnf();};
   document.getElementById('cnfM').classList.add('on');
 }
 function dSp(id){
   const s=ships.find(x=>x.id===id);
   document.getElementById('cnfT').textContent=`حذف شحنة "${s?.bl}"؟`;
-  dCb=async()=>{try{await db.collection('ships').doc(id).delete();addLog(`حذف شحنة: ${s?.bl}`,'delete');showT('✅ تم الحذف');}catch(e){showT('❌ '+e.message,true);}};
+  dCb=async()=>{try{await db.collection('ships').doc(id).delete();addLog(`حذف شحنة: ${s?.bl} — عميل: ${s?.nm} — تاريخ: ${s?.date}`,'delete');showT('✅ تم الحذف');}catch(e){showT('❌ '+e.message,true);}};
   document.getElementById('cnfBtn').onclick=()=>{dCb();closeCnf();};
   document.getElementById('cnfM').classList.add('on');
 }
@@ -2417,9 +2581,17 @@ function rRep(){
     <div class="rc"><div class="rn" style="color:var(--red)">${fS.filter(s=>s.status==='delayed').length}</div><div class="rl2">شحنات متأخرة</div></div>`;
   const reps={};fO.forEach(o=>{if(!reps[o.rep])reps[o.rep]={t:0,ok:0,miss:0};reps[o.rep].t++;if(o.status==='ok')reps[o.rep].ok++;else reps[o.rep].miss++;});
   const rp=document.getElementById('repRp');
-  if(rp)rp.innerHTML=Object.entries(reps).sort((a,b)=>b[1].t-a[1].t).map(([name,d])=>{
-    const r=d.t?Math.round(d.ok/d.t*100):0;const color=r>=80?'var(--green)':r>=60?'var(--gold)':'var(--red)';
-    return `<tr><td><strong>${name}</strong></td><td>${d.t}</td><td style="color:var(--green);font-weight:700">${d.ok}</td><td style="color:var(--red);font-weight:700">${d.miss}</td><td style="color:${color};font-weight:800">${r}%</td><td><div style="display:flex;align-items:center"><div class="pb-w"><div class="pb" style="width:${r}%;background:${color}"></div></div></div></td></tr>`;}).join('')||'<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted)">لا توجد بيانات</td></tr>';
+  const rankedReps=Object.entries(reps)
+    .map(([name,d])=>[name,{...d,rate:d.t?Math.round(d.ok/d.t*100):0}])
+    .filter(([,d])=>d.t>=3) // ترتيب عادل: نطلب 3 طلبات على الأقل لتفادي تذبذب النسبة بعدد قليل
+    .sort((a,b)=>b[1].rate-a[1].rate);
+  const unranked=Object.entries(reps).map(([name,d])=>[name,{...d,rate:d.t?Math.round(d.ok/d.t*100):0}]).filter(([,d])=>d.t<3);
+  const medals=['🥇','🥈','🥉'];
+  if(rp)rp.innerHTML=[...rankedReps,...unranked].map(([name,d],idx)=>{
+    const r=d.rate;const color=r>=80?'var(--green)':r>=60?'var(--gold)':'var(--red)';
+    const isRanked=idx<rankedReps.length;
+    const rankBadge=isRanked?(medals[idx]||`#${idx+1}`):'—';
+    return `<tr><td style="font-size:15px;font-weight:800;text-align:center;width:36px">${rankBadge}</td><td><strong>${name}</strong></td><td>${d.t}</td><td style="color:var(--green);font-weight:700">${d.ok}</td><td style="color:var(--red);font-weight:700">${d.miss}</td><td style="color:${color};font-weight:800">${r}%</td><td><div style="display:flex;align-items:center"><div class="pb-w"><div class="pb" style="width:${r}%;background:${color}"></div></div></div></td></tr>`;}).join('')||'<tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted)">لا توجد بيانات</td></tr>';
   const stC={};fS.forEach(s=>{stC[s.status]=(stC[s.status]||0)+1;});
   renderTopShorts();
   renderTopClients();
@@ -2444,10 +2616,11 @@ function renderLog(logs){
 // ===== EXPORT EXCEL =====
 function exportXL(type){
   let rows=[],fn='';const d=new Date().toLocaleDateString('ar-SA');
-  if(type==='orders'){fn=`تقرير_طلبات_المناديب_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','رقم المرجع','حالة الطلب'],...orders.map(o=>[o.date,o.rep,o.co,o.num||'',o.status==='ok'?'تم التسليم':'يوجد نواقص'])];}
+  const stLbl2={ok:'تم التسليم',review:'تحت المراجعة',missing:'يوجد نواقص',cstatus:'العميل موقف'};
+  if(type==='orders'){fn=`تقرير_طلبات_المناديب_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','رقم المرجع','حالة الطلب'],...orders.map(o=>[o.date,o.rep,o.co,o.num||'',stLbl2[o.status]||o.status])];}
   else if(type==='shorts'){fn=`تقرير_النواقص_${d}.csv`;rows=[['التاريخ','اسم المندوب','اسم العميل','اسم الصنف','الشد','الكمية (عدد)','ملاحظات']];orders.filter(o=>o.status==='missing').forEach(o=>{o.shorts?.forEach(s=>rows.push([o.date,o.rep,o.co,s.name,s.shad,s.qty,s.note||'']));});}
   else if(type==='ships'){fn=`تقرير_الشحنات_${d}.csv`;rows=[['التاريخ','رقم العميل','اسم العميل','رقم الإذن','الوجهة','مستلم الشحنة','رقم المستلم','اسم الناقل','رقم البوليصة','الطبليات','العنوان الوطني','شهر الفاتورة','حالة التسليم','ملاحظات'],...ships.map(s=>[s.date,s.cn,s.nm,s.pn,s.dest,s.rc,s.rn,s.car,s.bl,palStr(s.pals),s.addr,s.month,SM[s.status]?.l||s.status,s.notes])];}
-  else if(type==='report'){fn=`تقرير_الأداء_${d}.csv`;const r={};orders.forEach(o=>{if(!r[o.rep])r[o.rep]={t:0,ok:0,miss:0};r[o.rep].t++;if(o.status==='ok')r[o.rep].ok++;else r[o.rep].miss++;});rows=[['المندوب','إجمالي الطلبات','تم التسليم','نواقص','نسبة النجاح'],...Object.entries(r).map(([n,d])=>[n,d.t,d.ok,d.miss,d.t?Math.round(d.ok/d.t*100)+'%':'0%'])];}
+  else if(type==='report'){fn=`تقرير_الأداء_${d}.csv`;const r={};orders.forEach(o=>{if(!r[o.rep])r[o.rep]={t:0,ok:0,miss:0,review:0,cstatus:0};r[o.rep].t++;if(o.status==='ok')r[o.rep].ok++;else if(o.status==='review')r[o.rep].review++;else if(o.status==='cstatus')r[o.rep].cstatus++;else r[o.rep].miss++;});rows=[['المندوب','إجمالي الطلبات','تم التسليم','تحت المراجعة','نواقص','العميل موقف','نسبة النجاح'],...Object.entries(r).map(([n,d])=>[n,d.t,d.ok,d.review,d.miss,d.cstatus,d.t?Math.round(d.ok/d.t*100)+'%':'0%'])];}
   const csv='\uFEFF'+rows.map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=fn;a.click();
   showT(`📥 تم تصدير ${fn}`);addLog(`تصدير: ${fn}`,'info');
@@ -2458,8 +2631,8 @@ function exportXL(type){
 function printDailyReport(){
   const dt=document.getElementById('od')?.value || new Date().toISOString().split('T')[0];
   const dayOrders=orders.filter(o=>o.date===dt);
-  const stLbl={ok:'تم التسليم',review:'تحت المراجعة',missing:'نواقص',cstatus:'موقف العميل'};
-  const stColor={ok:'#059669',review:'#d97706',missing:'#dc2626',cstatus:'#b07d2e'};
+  const stLbl={ok:'تم التسليم',review:'تحت المراجعة',missing:'نواقص',cstatus:'العميل موقف'};
+  const stColor={ok:'#059669',review:'#d97706',missing:'#dc2626',cstatus:'#b91c1c'};
 
   // ترتيب حسب المندوب — كل مندوب وطلباته ورا بعض
   const sorted=[...dayOrders].sort((a,b)=>(a.rep||'').localeCompare(b.rep||'','ar'));
@@ -2556,9 +2729,7 @@ function initPinInputs(){
 function checkPin(inputs){
   const pin = inputs.map(x=>x.value).join('');
   if(pin === ADMIN_PIN){
-    document.getElementById('lu').value = 'عبدالله';
-    document.getElementById('lp').value = '55555';
-    login();
+    loginByUsername('عبدالله');
   } else {
     const err=document.getElementById('lerr');
     if(err) err.style.display='flex';
@@ -2576,12 +2747,19 @@ window.addEventListener('DOMContentLoaded', initPinInputs);
 // ===== PASSWORD =====
 function openPw(){['pw-o','pw-n','pw-c'].forEach(id=>document.getElementById(id).value='');document.getElementById('pw-err').style.display='none';document.getElementById('pwM').classList.add('on');}
 function closePw(){document.getElementById('pwM').classList.remove('on');}
-function changePw(){
+async function changePw(){
   const o=document.getElementById('pw-o').value,n=document.getElementById('pw-n').value,c=document.getElementById('pw-c').value,err=document.getElementById('pw-err');
-  if(o!==USERS[CU.un].pass){err.textContent='كلمة المرور الحالية غلط';err.style.display='block';return;}
+  const oldHash=await sha256Hex(o);
+  if(oldHash!==USERS[CU.un].hash){err.textContent='كلمة المرور الحالية غلط';err.style.display='block';return;}
   if(n.length<4){err.textContent='يجب أن تكون 4 أحرف على الأقل';err.style.display='block';return;}
   if(n!==c){err.textContent='كلمتا المرور غير متطابقتين';err.style.display='block';return;}
-  USERS[CU.un].pass=n;addLog('تغيير كلمة المرور','info');closePw();showT('✅ تم تغيير كلمة المرور');
+  const newHash=await sha256Hex(n);
+  USERS[CU.un].hash=newHash;
+  // ملاحظة: هذا التغيير يبقى فقط لهذه الجلسة في المتصفح، لأن قائمة المستخدمين
+  // مكتوبة داخل الكود نفسه وليست في قاعدة بيانات. لجعل تغيير كلمة المرور دائماً
+  // عبر كل الأجهزة، يجب نقل بيانات المستخدمين إلى Firestore.
+  addLog('تغيير كلمة المرور','info');closePw();
+  showT('✅ تم تغيير كلمة المرور لهذه الجلسة (يلزم تحديث الكود لحفظها بشكل دائم)');
 }
 
 // ===== UTILS =====
@@ -2647,8 +2825,23 @@ async function updateO(id){
     if(name)shorts.push({name,shad:ins[1].value.trim(),qty:ins[2].value.trim(),note:ins[3].value.trim()});
   });
   try{
-    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],updatedAt:new Date().toISOString()});
-    addLog(`تعديل طلب: ${co} — ${rep}`,'order');
+    // سجل تتبع تفصيلي: نقارن القيم القديمة بالجديدة قبل الحفظ
+    const before=orders.find(o=>o.id===id);
+    const changes=[];
+    if(before){
+      const stLblMap={ok:'تم التسليم',review:'تحت المراجعة',missing:'يوجد نواقص',cstatus:'العميل موقف'};
+      if(before.rep!==rep)changes.push(`المندوب: ${before.rep} ← ${rep}`);
+      if(before.co!==co)changes.push(`العميل: ${before.co} ← ${co}`);
+      if((before.num||'')!==num)changes.push(`المرجع: ${before.num||'—'} ← ${num||'—'}`);
+      if(before.date!==date)changes.push(`التاريخ: ${before.date} ← ${date}`);
+      if(before.status!==oSt)changes.push(`الحالة: ${stLblMap[before.status]||before.status} ← ${stLblMap[oSt]||oSt}`);
+      if((before.gnote||'')!==gnote)changes.push(`الملاحظات تم تعديلها`);
+      const beforeCount=before.shorts?.length||0;
+      if(beforeCount!==shorts.length)changes.push(`عدد الأصناف الناقصة: ${beforeCount} ← ${shorts.length}`);
+    }
+    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],updatedAt:new Date().toISOString(),updatedBy:CU.name});
+    const changeDesc=changes.length?` — التغييرات: ${changes.join('، ')}`:'';
+    addLog(`تعديل طلب: ${co} — ${rep}${changeDesc}`,'order');
     clrO();
     window._editOrderId=null;
     // Reset save button
@@ -2794,27 +2987,23 @@ function printMonthlyReport(){
 // ===== MANAGE REPS =====
 let customReps=JSON.parse(localStorage.getItem('customReps')||'null');
 if(!customReps){
-  customReps={
-    'أحمد العلي':{key:'احمد_العلي',pass:'rep1'},
-    'أحمد عبدالرحمن':{key:'احمد_عبدالرحمن',pass:'rep2'},
-    'حسين عدلي':{key:'حسين_عدلي',pass:'rep3'},
-    'صالح باحجاج':{key:'صالح_باحجاج',pass:'rep4'},
-    'أسامة بامعيبد':{key:'اسامه_بامعيبد',pass:'rep5'},
-    'محمود الجبالي':{key:'محمود_الجبالي',pass:'rep6'},
-    'محمد الجندي':{key:'محمد_الجندي',pass:'rep7'},
-    'وليد الدحدحي':{key:'وليد_الدحدحي',pass:'rep8'},
-  };
+  // أول مرة فقط: ننشئ السجل من بيانات USERS (التي تحوي hash وليس كلمة سر صريحة)
+  customReps={};
+  Object.entries(USERS).forEach(([key,u])=>{
+    if(u.role==='rep') customReps[u.name]={key, hash:u.hash};
+  });
 }
 function saveCustomReps(){localStorage.setItem('customReps',JSON.stringify(customReps));}
 
-function addRep(){
+async function addRep(){
   const name=document.getElementById('nr-name').value.trim();
   const user=document.getElementById('nr-user').value.trim();
   const pass=document.getElementById('nr-pass').value.trim();
   if(!name||!user||!pass){showT('يرجى تعبئة جميع الحقول',true);return;}
   if(customReps[name]){showT('المندوب موجود مسبقاً',true);return;}
-  customReps[name]={key:user,pass};
-  USERS[user]={pass,name,role:'rep',rl:'مندوب'};
+  const hash=await sha256Hex(pass);
+  customReps[name]={key:user,hash};
+  USERS[user]={hash,name,role:'rep',rl:'مندوب'};
   saveCustomReps();
   document.getElementById('nr-name').value='';
   document.getElementById('nr-user').value='';
@@ -2836,12 +3025,13 @@ function deleteRep(name){
   showT(`✅ تم حذف ${name}`);
 }
 
-function changeRepPass(name){
+async function changeRepPass(name){
   const newPass=prompt(`كلمة مرور جديدة لـ ${name}:`);
   if(!newPass||newPass.length<3){showT('كلمة مرور قصيرة جداً',true);return;}
   const key=customReps[name]?.key;
-  customReps[name].pass=newPass;
-  if(key&&USERS[key])USERS[key].pass=newPass;
+  const hash=await sha256Hex(newPass);
+  customReps[name].hash=hash;
+  if(key&&USERS[key])USERS[key].hash=hash;
   saveCustomReps();
   showT(`✅ تم تغيير كلمة مرور ${name}`);
 }
@@ -2881,7 +3071,7 @@ function updateRepSelect(){
 // Also load custom reps into USERS on startup
 Object.entries(customReps).forEach(([name,info])=>{
   if(!Object.values(USERS).find(u=>u.name===name)){
-    USERS[info.key]={pass:info.pass,name,role:'rep',rl:'مندوب'};
+    USERS[info.key]={hash:info.hash,name,role:'rep',rl:'مندوب'};
   }
 });
 
@@ -3010,7 +3200,7 @@ function showClientReport(clientName){
       </div>`:''}
     <div style="margin-top:14px">
       <div style="font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">آخر الطلبات</div>
-      ${clientOrders.slice(0,5).map(o=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${o.date} — ${o.rep}</span><span>${o.status==='ok'?`<span class="badge bgg">✅</span>`:`<span class="badge bgd">⚠️</span>`}</span></div>`).join('')}
+      ${clientOrders.slice(0,5).map(o=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px"><span>${o.date} — ${o.rep}</span><span>${ob(o.status)}</span></div>`).join('')}
     </div>
     <div class="md-actions"><button class="btn bg" onclick="closeDet()">إغلاق</button><button class="btn bbl" onclick="print()">🖨️ طباعة</button></div>`;
   document.getElementById('detM').classList.add('on');
@@ -3361,17 +3551,141 @@ function renderKPI(){
   }
 }
 
+// ===== BI DASHBOARD =====
+let biCharts={}; // نحتفظ بمراجع الرسوم لتدميرها قبل إعادة الرسم (مطلوب من Chart.js)
+const BI_COLORS={primary:'#2d4a3e',green:'#059669',red:'#dc2626',gold:'#b07d2e',blue:'#2563eb',purple:'#7c3aed',muted:'#8a9e94'};
+const BI_ST_LBL={ok:'تم التسليم',review:'تحت المراجعة',missing:'يوجد نواقص',cstatus:'العميل موقف'};
+const BI_ST_COLOR={ok:BI_COLORS.green,review:BI_COLORS.gold,missing:BI_COLORS.red,cstatus:'#b91c1c'};
+
+function biDateKey(dateStr,groupBy){
+  const d=new Date(dateStr+'T00:00:00');
+  if(groupBy==='week'){
+    // بداية الأسبوع (السبت) لتسهيل القراءة بالتقويم المحلي
+    const day=d.getDay();
+    const diff=(day+1)%7; // تحويل بحيث يبدأ الأسبوع من السبت
+    const start=new Date(d);start.setDate(d.getDate()-diff);
+    return start.toISOString().split('T')[0];
+  }
+  return dateStr;
+}
+
+function renderBI(retryCount){
+  retryCount=retryCount||0;
+  if(!document.getElementById('biCards'))return;
+  if(typeof Chart==='undefined'){
+    if(retryCount<6){ // إعادة محاولة لمدة 3 ثوانٍ تقريباً قبل افتراض فشل التحميل فعلاً
+      document.getElementById('biCards').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">⏳</div><p>جارٍ تحميل مكتبة الرسوم البيانية...</p></div>';
+      setTimeout(()=>renderBI(retryCount+1),500);
+      return;
+    }
+    document.getElementById('biCards').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">📊</div><p>تعذّر تحميل مكتبة الرسوم البيانية — تحقق من الاتصال بالإنترنت ثم أعد فتح الصفحة</p></div>';
+    return;
+  }
+  const days=parseInt(document.getElementById('biPeriod')?.value||30);
+  const groupBy=document.getElementById('biGroup')?.value||'day';
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);
+  const baseOrders=orders.filter(o=>o.source!=='warehouse');
+  const fOrders=days>=999?baseOrders:baseOrders.filter(o=>new Date(o.date)>=cutoff);
+
+  // ===== بطاقات ملخص سريعة =====
+  const total=fOrders.length;
+  const okCount=fOrders.filter(o=>o.status==='ok').length;
+  const missCount=fOrders.filter(o=>o.status==='missing').length;
+  const reviewCount=fOrders.filter(o=>o.status==='review').length;
+  const rate=total?Math.round(okCount/total*100):0;
+  document.getElementById('biCards').innerHTML=`
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--pl)">📦</div></div><div class="sc-n" style="color:var(--primary)">${total}</div><div class="sc-l">إجمالي الطلبات</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--gbg)">✅</div></div><div class="sc-n" style="color:var(--green)">${rate}%</div><div class="sc-l">نسبة التسليم</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--rbg)">⚠️</div></div><div class="sc-n" style="color:var(--red)">${missCount}</div><div class="sc-l">طلبات بنواقص</div></div>
+    <div class="sc"><div class="sc-top"><div class="sc-ico" style="background:var(--ybg)">🔍</div></div><div class="sc-n" style="color:var(--gold)">${reviewCount}</div><div class="sc-l">تحت المراجعة</div></div>`;
+
+  // ===== تجميع حسب التاريخ (يومي/أسبوعي) =====
+  const byDate={};
+  fOrders.forEach(o=>{
+    const key=biDateKey(o.date,groupBy);
+    if(!byDate[key])byDate[key]={total:0,ok:0,missing:0,review:0,cstatus:0};
+    byDate[key].total++;
+    byDate[key][o.status]=(byDate[key][o.status]||0)+1;
+  });
+  const sortedDates=Object.keys(byDate).sort();
+  const dateLabels=sortedDates.map(d=>new Date(d+'T00:00:00').toLocaleDateString('ar-EG',{day:'numeric',month:'short'}));
+
+  // ===== رسم 1: عدد الطلبات عبر الوقت =====
+  if(biCharts.orders)biCharts.orders.destroy();
+  biCharts.orders=new Chart(document.getElementById('biOrdersChart'),{
+    type:'line',
+    data:{labels:dateLabels,datasets:[{
+      label:'عدد الطلبات',
+      data:sortedDates.map(d=>byDate[d].total),
+      borderColor:BI_COLORS.primary,backgroundColor:'rgba(45,74,62,0.1)',
+      fill:true,tension:.3,pointRadius:3,
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+  });
+
+  // ===== رسم 2: نسبة التسليم مقابل النواقص عبر الوقت =====
+  if(biCharts.rate)biCharts.rate.destroy();
+  biCharts.rate=new Chart(document.getElementById('biRateChart'),{
+    type:'line',
+    data:{labels:dateLabels,datasets:[
+      {label:'تم التسليم',data:sortedDates.map(d=>byDate[d].ok||0),borderColor:BI_COLORS.green,backgroundColor:'rgba(5,150,105,0.08)',fill:true,tension:.3,pointRadius:2},
+      {label:'نواقص',data:sortedDates.map(d=>byDate[d].missing||0),borderColor:BI_COLORS.red,backgroundColor:'rgba(220,38,38,0.08)',fill:true,tension:.3,pointRadius:2},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,font:{family:'Tajawal'}}}},
+      scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+  });
+
+  // ===== رسم 3: أداء المناديب (مقارنة) =====
+  const repStats={};
+  fOrders.forEach(o=>{
+    if(!repStats[o.rep])repStats[o.rep]={ok:0,missing:0,review:0,cstatus:0,total:0};
+    repStats[o.rep].total++;
+    repStats[o.rep][o.status]=(repStats[o.rep][o.status]||0)+1;
+  });
+  const repNames=Object.keys(repStats).sort((a,b)=>repStats[b].total-repStats[a].total).slice(0,10);
+  if(biCharts.reps)biCharts.reps.destroy();
+  biCharts.reps=new Chart(document.getElementById('biRepsChart'),{
+    type:'bar',
+    data:{labels:repNames,datasets:[
+      {label:'تم التسليم',data:repNames.map(r=>repStats[r].ok||0),backgroundColor:BI_COLORS.green},
+      {label:'نواقص',data:repNames.map(r=>repStats[r].missing||0),backgroundColor:BI_COLORS.red},
+      {label:'تحت المراجعة',data:repNames.map(r=>repStats[r].review||0),backgroundColor:BI_COLORS.gold},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,font:{family:'Tajawal'}}}},
+      scales:{x:{stacked:true,ticks:{font:{family:'Tajawal',size:11}}},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}}}
+  });
+
+  // ===== رسم 4: توزيع حالات الطلبات (دونات) =====
+  const statusKeys=['ok','review','missing','cstatus'];
+  const statusCounts=statusKeys.map(k=>fOrders.filter(o=>o.status===k).length);
+  if(biCharts.status)biCharts.status.destroy();
+  biCharts.status=new Chart(document.getElementById('biStatusChart'),{
+    type:'doughnut',
+    data:{labels:statusKeys.map(k=>BI_ST_LBL[k]),datasets:[{
+      data:statusCounts,
+      backgroundColor:statusKeys.map(k=>BI_ST_COLOR[k]),
+      borderWidth:2,borderColor:'#fff',
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom',labels:{usePointStyle:true,font:{family:'Tajawal',size:11}}}}}
+  });
+}
+
 // ===== INIT =====
 const BASE_URL = window.location.origin + '/';
 const REP_LINKS = {
-  'أحمد العلي':      {key:'احمد_العلي',     pass:'rep1'},
-  'أحمد عبدالرحمن':  {key:'احمد_عبدالرحمن', pass:'rep2'},
-  'حسين عدلي':       {key:'حسين_عدلي',       pass:'rep3'},
-  'صالح باحجاج':     {key:'صالح_باحجاج',     pass:'rep4'},
-  'أسامة بامعيبد':   {key:'اسامه_بامعيبد',   pass:'rep5'},
-  'محمود الجبالي':   {key:'محمود_الجبالي',   pass:'rep6'},
-  'محمد الجندي':     {key:'محمد_الجندي',     pass:'rep7'},
-  'وليد الدحدحي':    {key:'وليد_الدحدحي',    pass:'rep8'},
+  'أحمد العلي':      {key:'احمد_العلي'},
+  'أحمد عبدالرحمن':  {key:'احمد_عبدالرحمن'},
+  'حسين عدلي':       {key:'حسين_عدلي'},
+  'صالح باحجاج':     {key:'صالح_باحجاج'},
+  'أسامة بامعيبد':   {key:'اسامه_بامعيبد'},
+  'محمود الجبالي':   {key:'محمود_الجبالي'},
+  'محمد الجندي':     {key:'محمد_الجندي'},
+  'وليد الدحدحي':    {key:'وليد_الدحدحي'},
 };
 
 window.addEventListener('load',()=>{
@@ -3383,9 +3697,7 @@ window.addEventListener('load',()=>{
     // Find matching user
     const user=Object.entries(USERS).find(([u,v])=>u===repKey);
     if(user){
-      document.getElementById('lu').value=user[0];
-      document.getElementById('lp').value=user[1].pass;
-      setTimeout(()=>login(),500);
+      setTimeout(()=>loginByUsername(user[0]),500);
     }
   }
 });
