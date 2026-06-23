@@ -546,7 +546,7 @@ tbody tr:hover{background:var(--bg3);}
                 <div class="img-prevs" id="iPrev"></div>
               </div>
             </div>
-            <div class="fa"><button class="btn bg" onclick="clrO()">🔄 مسح</button><button class="btn bp" onclick="saveO()">💾 حفظ الطلب</button></div>
+            <div class="fa"><button class="btn bg" onclick="clrO()">🔄 مسح</button><button class="btn bp" onclick="handleSave()">💾 حفظ الطلب</button></div>
           </div>
           <div class="card">
             <div class="ch">
@@ -1664,6 +1664,15 @@ function handleI(e){
     }catch(err){showT('❌ خطأ في معالجة الصورة: '+err.message,true);}
   });
 }
+// دالة موحّدة للحفظ — تفحص لو في وضع تعديل أو إضافة جديدة
+function handleSave(){
+  if(window._editOrderId){
+    updateO(window._editOrderId);
+  } else {
+    saveO();
+  }
+}
+
 let isSavingOrder=false;
 async function saveO(){
   if(isSavingOrder)return; // منع الحفظ المزدوج عند الضغط أكثر من مرة بسرعة
@@ -1713,6 +1722,10 @@ function clrO(){
   document.getElementById('ssec').classList.remove('on');
   document.getElementById('sItems').innerHTML='';
   document.getElementById('iPrev').innerHTML='';
+  // إعادة ضبط وضع التعديل
+  window._editOrderId=null;
+  const btn=document.querySelector('[onclick="handleSave()"]');
+  if(btn)btn.textContent='💾 حفظ الطلب';
 }
 
 function ob(s){
@@ -2800,21 +2813,24 @@ function editO(id){
   document.getElementById('o-d').value=o.date||'';
   document.getElementById('o-gn').value=o.gnote||'';
   setSt(o.status||'ok');
-  // Fill shorts
+  // Fill shorts — نحتفظ بها في الفورم حتى لو الحالة مش missing
   document.getElementById('sItems').innerHTML='';
-  o.shorts?.forEach(s=>{
-    const d=document.createElement('div');d.className='si-row';
-    d.innerHTML=`<input type="text" value="${s.name}" placeholder="اسم الصنف"><input type="text" value="${s.shad}" placeholder="24" style="text-align:center"><input type="number" value="${s.qty}" placeholder="0" min="0" style="text-align:center"><input type="text" value="${s.note||''}" placeholder="ملاحظة"><button class="btn-rm" onclick="this.parentElement.remove()">✕</button>`;
-    document.getElementById('sItems').appendChild(d);
-  });
+  if(o.shorts?.length){
+    document.getElementById('ssec').classList.add('on'); // نعرض قسم النواقص دايماً لو فيه نواقص
+    o.shorts.forEach(s=>{
+      const d=document.createElement('div');d.className='si-row';
+      d.innerHTML=`<input type="text" value="${s.name}" placeholder="اسم الصنف"><input type="text" value="${s.shad}" placeholder="24" style="text-align:center"><input type="number" value="${s.qty}" placeholder="0" min="0" style="text-align:center"><input type="text" value="${s.note||''}" placeholder="ملاحظة"><button class="btn-rm" onclick="this.parentElement.remove()">✕</button>`;
+      document.getElementById('sItems').appendChild(d);
+    });
+  }
   // Set imgs
   imgs=[...(o.imgs||[])];
   document.getElementById('iPrev').innerHTML=imgs.map((im,i)=>`<div class="img-pw"><img src="${im}"><button class="rim" onclick="imgs.splice(${i},1);this.parentElement.remove()">✕</button></div>`).join('');
-  // Store edit ID
+  // Store edit ID — handleSave() will use this to decide add vs update
   window._editOrderId=id;
-  // Change save button
-  const btn=document.querySelector('[onclick="saveO()"]');
-  if(btn){btn.textContent='💾 حفظ التعديل';btn.onclick=()=>updateO(id);}
+  // Update button text only — onclick stays as handleSave() which reads _editOrderId
+  const btn=document.querySelector('[onclick="handleSave()"]');
+  if(btn)btn.textContent='💾 حفظ التعديل';
   // Scroll to form
   document.getElementById('oForm').scrollIntoView({behavior:'smooth'});
   showT('✏️ جاري تعديل الطلب — عدّل البيانات واضغط حفظ');
@@ -2835,9 +2851,13 @@ async function updateO(id){
     const name=ins[0].value.trim();
     if(name)shorts.push({name,shad:ins[1].value.trim(),qty:ins[2].value.trim(),note:ins[3].value.trim()});
   });
+  // لو الحالة الجديدة مش "نواقص"، احتفظ بالنواقص القديمة المحفوظة في قاعدة البيانات
+  // (قسم النواقص في الفورم ممكن يكون مخفياً، فالـ shorts الظاهرة في DOM تبقى فاضية)
+  const beforeO=orders.find(o=>o.id===id);
+  const finalShorts=oSt==='missing'?shorts:(shorts.length>0?shorts:(beforeO?.shorts||[]));
   try{
     // سجل تتبع تفصيلي: نقارن القيم القديمة بالجديدة قبل الحفظ
-    const before=orders.find(o=>o.id===id);
+    const before=beforeO;
     const changes=[];
     if(before){
       const stLblMap={ok:'تم التسليم',review:'تحت المراجعة',missing:'يوجد نواقص',cstatus:'العميل موقف'};
@@ -2848,16 +2868,12 @@ async function updateO(id){
       if(before.status!==oSt)changes.push(`الحالة: ${stLblMap[before.status]||before.status} ← ${stLblMap[oSt]||oSt}`);
       if((before.gnote||'')!==gnote)changes.push(`الملاحظات تم تعديلها`);
       const beforeCount=before.shorts?.length||0;
-      if(beforeCount!==shorts.length)changes.push(`عدد الأصناف الناقصة: ${beforeCount} ← ${shorts.length}`);
+      if(beforeCount!==finalShorts.length)changes.push(`عدد الأصناف الناقصة: ${beforeCount} ← ${finalShorts.length}`);
     }
-    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],updatedAt:new Date().toISOString(),updatedBy:CU.name});
+    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts:finalShorts,imgs:[...imgs],updatedAt:new Date().toISOString(),updatedBy:CU.name});
     const changeDesc=changes.length?` — التغييرات: ${changes.join('، ')}`:'';
     addLog(`تعديل طلب: ${co} — ${rep}${changeDesc}`,'order');
-    clrO();
-    window._editOrderId=null;
-    // Reset save button
-    const btn=document.querySelector('[onclick*="updateO"]');
-    if(btn){btn.textContent='💾 حفظ الطلب';btn.onclick=saveO;}
+    clrO(); // clrO تعيد ضبط _editOrderId والزرار تلقائياً
     showT('✅ تم تعديل الطلب بنجاح');
   }catch(e){showT('❌ خطأ: '+e.message,true);}
 }
