@@ -11,7 +11,7 @@
   --bg:#f7f0e8;--bg2:#fffaf3;--bg3:#f0e4d4;
   --border:#e0cdb8;--border2:#d0b89c;
   --text:#2e1a10;--muted:#9a7860;--muted2:#dcc8b0;
-  --primary:#6b3a26;--primary2:#8a5236;--pl:rgba(107,58,38,0.08);
+  --primary:#4a2818;--primary2:#6b3a26;--pl:rgba(74,40,24,0.08);
   --green:#6b7d4a;--gbg:#eef1e6;
   --red:#a8472e;--rbg:#fbece6;
   --gold:#b8843c;--ybg:#fbf1e2;
@@ -811,13 +811,8 @@ tbody tr:hover{background:var(--bg3);}
               <div class="f"><label>اسم الناقل *</label><input type="text" id="sp-cr" placeholder="شركة الناقل"></div>
               <div class="f"><label>رقم البوليصة *</label><input type="text" id="sp-bl" placeholder="رقم البوليصة"></div>
               <div class="f"><label>العنوان الوطني</label><input type="text" id="sp-ad" placeholder="العنوان الوطني"></div>
-              <div class="f full">
-                <label>📍 لصق رابط لوكيشن الواتساب / خرائط جوجل</label>
-                <input type="text" id="sp-loc-paste" placeholder="الصق الرابط هنا... سيتم استخراج الإحداثيات تلقائياً" oninput="parseLocationUrl(this.value)" style="direction:ltr">
-                <div id="sp-loc-status" style="font-size:11px;margin-top:5px;min-height:16px;font-weight:700"></div>
-                <input type="hidden" id="sp-lat">
-                <input type="hidden" id="sp-lng">
-              </div>
+              <input type="hidden" id="sp-lat">
+              <input type="hidden" id="sp-lng">
               <div class="f"><label>رقم جوال المستلم (للتحديث)</label><input type="tel" id="sp-phone" placeholder="05xxxxxxxx" style="direction:ltr"></div>
               <div class="f"><label>شهر الفاتورة</label><input type="text" id="sp-mn" placeholder="مايو 2024"></div>
               <div class="f"><label>رابط بورتال التتبع</label><input type="text" id="sp-pt" placeholder="https://..."></div>
@@ -853,6 +848,38 @@ tbody tr:hover{background:var(--bg3);}
             </div>
             <div class="tw"><table><thead><tr><th>التاريخ</th><th>العميل</th><th>رقم الإذن</th><th>الوجهة</th><th>الناقل</th><th>البوليصة</th><th>الطبليات</th><th>شهر الفاتورة</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody id="spTb"></tbody></table>
             <div class="empty" id="spEm" style="display:none"><div class="ei">🚚</div><p>لا توجد شحنات</p></div></div>
+          </div>
+        </div>
+
+        <!-- DRIVERS -->
+        <div class="panel" id="p-drivers">
+          <div class="ph"><h2>🚛 سواقين</h2><p>تحديث مواقع العملاء عبر روابط الواتساب / خرائط جوجل</p><div class="ph-ln"></div></div>
+          <div class="card" style="max-width:640px">
+            <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>📍 لصق رابط لوكيشن الواتساب / خرائط جوجل</div></div>
+            <div style="padding:16px">
+              <div class="f">
+                <label>اختر الشحنة</label>
+                <select id="dr-ship-select" style="font-family:'Tajawal',sans-serif">
+                  <option value="">— اختر شحنة لتحديث موقعها —</option>
+                </select>
+              </div>
+              <div class="f full" style="margin-top:12px">
+                <label>📍 الصق الرابط هنا</label>
+                <input type="text" id="dr-loc-paste" placeholder="رابط واتساب أو خرائط جوجل... سيتم استخراج الإحداثيات تلقائياً" oninput="parseDriverLocationUrl(this.value)" style="direction:ltr">
+                <div id="dr-loc-status" style="font-size:12px;margin-top:6px;min-height:18px;font-weight:700"></div>
+                <input type="hidden" id="dr-lat">
+                <input type="hidden" id="dr-lng">
+              </div>
+              <div class="fa" style="padding:14px 0 0;border:none;justify-content:flex-start">
+                <button class="btn bp" onclick="saveDriverLocation()">💾 حفظ الموقع للشحنة المختارة</button>
+              </div>
+            </div>
+          </div>
+          <div class="card" style="max-width:640px">
+            <div class="ch"><div class="ct"><div class="cd" style="background:var(--gold)"></div>📋 المواقع المحفوظة مؤخراً</div></div>
+            <div style="padding:16px" id="dr-recent-locs">
+              <div class="empty"><div class="ei">📍</div><p>لا توجد مواقع محفوظة بعد</p></div>
+            </div>
           </div>
         </div>
 
@@ -1483,7 +1510,7 @@ function initNav(){
     admin: [
       {grp:'الرئيسية'},{ic:'📊',n:'dash',lbl:'لوحة التحكم'},
       {grp:'العمليات'},{ic:'📦',n:'orders',lbl:'طلبات المناديب',badge:true},
-      {ic:'⚠️',n:'shorts',lbl:'النواقص'},{ic:'➕',n:'addshort',lbl:'إضافة نواقص'},{ic:'📋',n:'shortscur',lbl:'النواقص الحالية'},{ic:'📦',n:'shortsarr',lbl:'الأصناف الواصلة'},{ic:'🧾',n:'shortssum',lbl:'ملخص النواقص'},{ic:'🚚',n:'ships',lbl:'الشحنات'},{ic:'📡',n:'shipview',lbl:'متابعة الشحنات'},
+      {ic:'⚠️',n:'shorts',lbl:'النواقص'},{ic:'➕',n:'addshort',lbl:'إضافة نواقص'},{ic:'📋',n:'shortscur',lbl:'النواقص الحالية'},{ic:'📦',n:'shortsarr',lbl:'الأصناف الواصلة'},{ic:'🧾',n:'shortssum',lbl:'ملخص النواقص'},{ic:'🚚',n:'ships',lbl:'الشحنات'},{ic:'📡',n:'shipview',lbl:'متابعة الشحنات'},{ic:'🚛',n:'drivers',lbl:'سواقين'},
       {grp:'التقارير'},{ic:'📈',n:'report',lbl:'التقارير'},{ic:'📊',n:'bi',lbl:'لوحة المؤشرات'},{ic:'🎯',n:'kpi',lbl:'مؤشرات النواقص'},{ic:'📋',n:'log',lbl:'سجل العمليات'},
       {grp:'الإعدادات'},{ic:'⚙️',n:'settings',lbl:'الإعدادات'},{ic:'🔗',n:'replinks',lbl:'روابط المناديب'},{ic:'👥',n:'managereps',lbl:'إدارة المناديب'},
     ],
@@ -1518,7 +1545,7 @@ function initNav(){
 }
 
 // ===== PANELS =====
-const pN={dash:'لوحة التحكم',orders:'طلبات المناديب',shorts:'النواقص',addshort:'إضافة نواقص',shortscur:'النواقص الحالية',shortsarr:'الأصناف الواصلة',shortssum:'ملخص النواقص',ships:'الشحنات',shipview:'متابعة الشحنات',repview:'طلباتي',notes:'ملاحظات للمناديب',report:'التقارير',bi:'لوحة المؤشرات',log:'سجل العمليات',settings:'الإعدادات',replinks:'روابط المناديب',managereps:'إدارة المناديب',kpi:'مؤشرات أداء النواقص'};
+const pN={dash:'لوحة التحكم',orders:'طلبات المناديب',shorts:'النواقص',addshort:'إضافة نواقص',shortscur:'النواقص الحالية',shortsarr:'الأصناف الواصلة',shortssum:'ملخص النواقص',ships:'الشحنات',shipview:'متابعة الشحنات',drivers:'سواقين',repview:'طلباتي',notes:'ملاحظات للمناديب',report:'التقارير',bi:'لوحة المؤشرات',log:'سجل العمليات',settings:'الإعدادات',replinks:'روابط المناديب',managereps:'إدارة المناديب',kpi:'مؤشرات أداء النواقص'};
 
 function renderShipViewLinks(){
   const wrap = document.getElementById('shipViewLinksWrap');
@@ -1641,6 +1668,7 @@ function gp(n,el){
   if(n==='bi')renderBI();
   // Purchase: show cards, admin: show table
   if(n==='shipview') svLoad();
+  if(n==='drivers'){ fillDriverShipSelect(); renderRecentDriverLocs(); }
   if(n==='shorts'){
     const isP=CU.role==='purchase';
     document.getElementById('shortCardsWrap').style.display=isP?'block':'none';
@@ -2545,34 +2573,108 @@ function getPals(){
 function palStr(pals){return pals?.map(p=>`${p.qty}×(${p.l}×${p.w}×${p.h})`).join(' | ')||'—';}
 
 // ===== استخراج إحداثيات من رابط الواتساب / خرائط جوجل =====
-function parseLocationUrl(url){
-  const statusEl=document.getElementById('sp-loc-status');
-  const latEl=document.getElementById('sp-lat');
-  const lngEl=document.getElementById('sp-lng');
-  if(!url||url.length<10){statusEl.textContent='';return;}
-  // أنماط مختلفة لروابط الخرائط
+// دالة مشتركة لاستخراج الإحداثيات من رابط واتساب/خرائط جوجل
+function extractLatLng(url){
+  if(!url||url.length<10)return null;
   const patterns=[
-    /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/,           // ?q=lat,lng
-    /[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/,           // ?ll=lat,lng
-    /@(-?\d+\.?\d*),(-?\d+\.?\d*)/,                 // @lat,lng (google maps)
-    /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/,             // !3d!4d (embedded)
-    /\/(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,          // /lat,lng in path
-    /lat=(-?\d+\.?\d*)&lng=(-?\d+\.?\d*)/,          // lat=&lng= params
-    /latitude=(-?\d+\.?\d*)&longitude=(-?\d+\.?\d*)/,// latitude=&longitude=
+    /[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+    /[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+    /@(-?\d+\.?\d*),(-?\d+\.?\d*)/,
+    /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/,
+    /\/(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,
+    /lat=(-?\d+\.?\d*)&lng=(-?\d+\.?\d*)/,
+    /latitude=(-?\d+\.?\d*)&longitude=(-?\d+\.?\d*)/,
   ];
   for(const p of patterns){
     const m=url.match(p);
     if(m){
       const lat=parseFloat(m[1]),lng=parseFloat(m[2]);
-      if(lat>=-90&&lat<=90&&lng>=-180&&lng<=180){
-        latEl.value=lat;lngEl.value=lng;
-        statusEl.innerHTML=`✅ <span style="color:var(--green)">تم استخراج الإحداثيات: ${lat.toFixed(6)}, ${lng.toFixed(6)}</span> — <a href="https://maps.google.com/?q=${lat},${lng}" target="_blank" style="color:var(--blue);font-size:10px">تحقق ↗</a>`;
-        return;
-      }
+      if(lat>=-90&&lat<=90&&lng>=-180&&lng<=180)return {lat,lng};
     }
+  }
+  return null;
+}
+
+function parseLocationUrl(url){
+  const statusEl=document.getElementById('sp-loc-status');
+  const latEl=document.getElementById('sp-lat');
+  const lngEl=document.getElementById('sp-lng');
+  if(!statusEl||!latEl||!lngEl)return;
+  if(!url||url.length<10){statusEl.textContent='';return;}
+  const r=extractLatLng(url);
+  if(r){
+    latEl.value=r.lat;lngEl.value=r.lng;
+    statusEl.innerHTML=`✅ <span style="color:var(--green)">تم استخراج الإحداثيات: ${r.lat.toFixed(6)}, ${r.lng.toFixed(6)}</span> — <a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue);font-size:10px">تحقق ↗</a>`;
+    return;
   }
   statusEl.innerHTML='<span style="color:var(--red)">⚠️ لم يتم التعرف على الرابط — جرب نسخ الرابط من خرائط جوجل مباشرة</span>';
   latEl.value='';lngEl.value='';
+}
+
+// ===== صفحة سواقين — أداة لصق اللوكيشن المستقلة =====
+function parseDriverLocationUrl(url){
+  const statusEl=document.getElementById('dr-loc-status');
+  const latEl=document.getElementById('dr-lat');
+  const lngEl=document.getElementById('dr-lng');
+  if(!statusEl||!latEl||!lngEl)return;
+  if(!url||url.length<10){statusEl.textContent='';return;}
+  const r=extractLatLng(url);
+  if(r){
+    latEl.value=r.lat;lngEl.value=r.lng;
+    statusEl.innerHTML=`✅ <span style="color:var(--green)">تم استخراج الإحداثيات: ${r.lat.toFixed(6)}, ${r.lng.toFixed(6)}</span> — <a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue);font-size:10px">تحقق ↗</a>`;
+    return;
+  }
+  statusEl.innerHTML='<span style="color:var(--red)">⚠️ لم يتم التعرف على الرابط — جرب نسخ الرابط من خرائط جوجل مباشرة</span>';
+  latEl.value='';lngEl.value='';
+}
+
+function fillDriverShipSelect(){
+  const sel=document.getElementById('dr-ship-select');
+  if(!sel)return;
+  const cur=sel.value;
+  const sorted=[...ships].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  sel.innerHTML='<option value="">— اختر شحنة لتحديث موقعها —</option>'+
+    sorted.map(s=>`<option value="${s.id}">${s.nm||'—'} — ${s.bl||'—'} (${s.date||''})</option>`).join('');
+  if(cur)sel.value=cur;
+}
+
+async function saveDriverLocation(){
+  const shipId=document.getElementById('dr-ship-select')?.value;
+  const lat=document.getElementById('dr-lat')?.value;
+  const lng=document.getElementById('dr-lng')?.value;
+  if(!shipId){showT('يرجى اختيار الشحنة أولاً',true);return;}
+  if(!lat||!lng){showT('يرجى لصق رابط لوكيشن صحيح أولاً',true);return;}
+  if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
+  try{
+    await db.collection('ships').doc(shipId).update({lat:parseFloat(lat),lng:parseFloat(lng),locUpdatedAt:new Date().toISOString()});
+    const s=ships.find(x=>x.id===shipId);
+    addLog(`تحديث موقع العميل: ${s?.nm||shipId}`,'ship');
+    showT('✅ تم حفظ موقع العميل بنجاح');
+    document.getElementById('dr-loc-paste').value='';
+    document.getElementById('dr-loc-status').textContent='';
+    document.getElementById('dr-lat').value='';
+    document.getElementById('dr-lng').value='';
+    document.getElementById('dr-ship-select').value='';
+    renderRecentDriverLocs();
+  }catch(err){showT('❌ خطأ: '+err.message,true);}
+}
+
+function renderRecentDriverLocs(){
+  const wrap=document.getElementById('dr-recent-locs');
+  if(!wrap)return;
+  const withLoc=ships.filter(s=>s.lat&&s.lng).sort((a,b)=>(b.locUpdatedAt||'').localeCompare(a.locUpdatedAt||'')).slice(0,10);
+  if(!withLoc.length){
+    wrap.innerHTML='<div class="empty"><div class="ei">📍</div><p>لا توجد مواقع محفوظة بعد</p></div>';
+    return;
+  }
+  wrap.innerHTML=withLoc.map(s=>`
+    <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:800">${s.nm||'—'}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:monospace">${s.bl||'—'} — ${parseFloat(s.lat).toFixed(5)}, ${parseFloat(s.lng).toFixed(5)}</div>
+      </div>
+      <a href="https://maps.google.com/?q=${s.lat},${s.lng}" target="_blank" class="btn bg bxs">🗺️ خريطة</a>
+    </div>`).join('');
 }
 
 async function saveSp(){
@@ -2612,7 +2714,7 @@ async function saveSp(){
 }
 
 function clrSp(){
-  ['sp-dt','sp-cn','sp-nm','sp-pn','sp-ds','sp-rc','sp-rn','sp-cr','sp-bl','sp-ad','sp-mn','sp-nt','sp-pt','sp-loc-paste','sp-lat','sp-lng','sp-phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['sp-dt','sp-cn','sp-nm','sp-pn','sp-ds','sp-rc','sp-rn','sp-cr','sp-bl','sp-ad','sp-mn','sp-nt','sp-pt','sp-lat','sp-lng','sp-phone'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const statusEl=document.getElementById('sp-loc-status');if(statusEl)statusEl.textContent='';
   document.getElementById('sp-st').value='shipped';
   const drSel=document.getElementById('sp-driver');if(drSel)drSel.value='';
