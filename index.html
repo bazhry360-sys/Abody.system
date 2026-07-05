@@ -8,19 +8,23 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700;900&display=swap');
 :root{
-  --bg:#2B3436;--bg2:#4A2620;--bg3:#232B2D;
-  --border:#5C3229;--border2:#6E3C31;
-  --text:#ECEAE7;--muted:#9FACAD;--muted2:#6E7B7D;
-  --primary:#C25A47;--primary2:#DD6752;--pl:rgba(221,103,82,0.14);
+  --bg:#2B3436;--bg2:#FFFFFF;--bg3:#232B2D;
+  --border:#E3DFDA;--border2:#C9BEB2;
+  --text:#211D17;--muted:#6B6358;--muted2:#9A9184;
+  --primary:#A93A2A;--primary2:#C74634;--pl:rgba(199,70,52,0.08);
   --sidebar:#202829;
-  --green:#4CAF50;--gbg:rgba(76,175,80,0.12);
-  --red:#E2574A;--rbg:rgba(226,87,74,0.12);
-  --gold:#F1B13F;--ybg:rgba(241,177,63,0.12);
-  --blue:#7C9BB5;--bbg:rgba(124,155,181,0.12);
-  --orange:#D08A5C;--purple:#A78BB0;
-  --sh:0 1px 2px rgba(0,0,0,0.2),0 1px 4px rgba(0,0,0,0.25);
-  --shl:0 10px 28px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.3);
+  --green:#2E7D32;--gbg:#E9F3E8;
+  --red:#A93226;--rbg:#F8EAE8;
+  --gold:#B8860B;--ybg:#FBF3E1;
+  --blue:#34548A;--bbg:#EAEFF6;
+  --orange:#B5651D;--purple:#846A92;
+  --sh:0 1px 2px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.08);
+  --shl:0 10px 28px rgba(0,0,0,0.3),0 2px 8px rgba(0,0,0,0.15);
 }
+
+/* Page-level text sits directly on the dark canvas (outside cards) — force light */
+.ph h2{color:#F3F1EE;}
+.ph p{color:rgba(243,241,238,.62);}
 table thead tr{background:rgba(0,0,0,0.03);}
 .sc,.rep-stat,.rc,.note-card{background:var(--bg2);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -241,7 +245,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
   .fab{bottom:20px;left:16px;}
 }
 .brand{display:flex;align-items:center;gap:10px;}
-.brand-ico{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.brand-ico{width:34px;height:34px;background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid rgba(255,255,255,.15);}
 .brand-n{font-family:'Playfair Display',serif;font-size:18px;font-weight:900;color:var(--primary);}
 .brand-s{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-top:-2px;font-family:'Tajawal',sans-serif;}
 .tb-r{display:flex;align-items:center;gap:10px;}
@@ -253,7 +257,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
 /* SIDEBAR */
 .sb{width:244px;background:var(--sidebar);border-left:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;position:sticky;top:0;height:calc(100vh - 92px);overflow-y:auto;flex-shrink:0;}
 .sb-user{padding:14px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
-.sb-av{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.sb-av{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;border:1px solid rgba(255,255,255,.12);}
 .sb-av.admin{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;}
 .sb-av.sales{background:linear-gradient(135deg,var(--gold),#D4A017);color:#fff;}
 .sb-av.purchase{background:linear-gradient(135deg,var(--orange),#D6A15F);color:#fff;}
@@ -303,7 +307,7 @@ nav{flex:1;padding:8px 7px;}
 .sc{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--sh);transition:all .2s;position:relative;overflow:hidden;}
 .sc:hover{transform:translateY(-2px);box-shadow:var(--shl);}
 .sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
-.sc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.sc-ico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid var(--border);}
 .sc-tr{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;}
 .sc-n{font-size:24px;font-weight:900;font-family:'IBM Plex Mono',monospace;line-height:1;}
 .sc-l{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600;}
@@ -473,7 +477,7 @@ tbody tr:hover{background:var(--bg3);}
 .gs-group-title{font-size:10px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;padding:8px 10px 4px;}
 .gs-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .15s;}
 .gs-item:hover{background:var(--bg3);}
-.gs-item-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--pl);}
+.gs-item-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--pl);border:1px solid var(--border);}
 .gs-item-main{flex:1;min-width:0;}
 .gs-item-title{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gs-item-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
@@ -3762,13 +3766,14 @@ function printPOOrder(){
     : `<img src="${poImageData}" class="doc">`;
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
   <style>
-    *{box-sizing:border-box;}
+    *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    html,body{background:#fff !important;}
     body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
-    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
+    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
     .h h1{font-size:16px;margin:0;color:#A93A2A;}
     .h span{font-size:11px;color:#666;}
     .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
-    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8;margin-bottom:10px;}
+    .notes{border:2.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8 !important;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
@@ -3855,13 +3860,14 @@ function printOrderAttachment(){
     : `<img src="${mainOrderImg}" class="doc">`;
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
   <style>
-    *{box-sizing:border-box;}
+    *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    html,body{background:#fff !important;}
     body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
-    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
+    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
     .h h1{font-size:16px;margin:0;color:#A93A2A;}
     .h span{font-size:11px;color:#666;}
     .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
-    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8;margin-bottom:10px;}
+    .notes{border:2.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8 !important;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
