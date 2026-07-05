@@ -8,8 +8,8 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700;900&display=swap');
 :root{
-  --bg:#2B3436;--bg2:#333F41;--bg3:#232B2D;
-  --border:#3F4A4C;--border2:#4A575A;
+  --bg:#2B3436;--bg2:#4A2620;--bg3:#232B2D;
+  --border:#5C3229;--border2:#6E3C31;
   --text:#ECEAE7;--muted:#9FACAD;--muted2:#6E7B7D;
   --primary:#C25A47;--primary2:#DD6752;--pl:rgba(221,103,82,0.14);
   --sidebar:#202829;
@@ -3768,15 +3768,15 @@ function printPOOrder(){
     .h h1{font-size:16px;margin:0;color:#A93A2A;}
     .h span{font-size:11px;color:#666;}
     .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
-    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8;}
+    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8;margin-bottom:10px;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
     @media print{ body{padding:6px;} }
   </style></head><body>
   <div class="h"><h1>🚚 عبودي — طلب</h1><span>${dt}</span></div>
-  ${mediaTag}
   ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
+  ${mediaTag}
   </body></html>`);
   w.document.close();
   setTimeout(()=>{ w.focus(); w.print(); }, 400);
@@ -3861,15 +3861,15 @@ function printOrderAttachment(){
     .h h1{font-size:16px;margin:0;color:#A93A2A;}
     .h span{font-size:11px;color:#666;}
     .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
-    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8;}
+    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8;margin-bottom:10px;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
     @media print{ body{padding:6px;} }
   </style></head><body>
   <div class="h"><h1>🚚 عبودي — طلب${co?': '+co:''}</h1><span>${dt}</span></div>
-  ${mediaTag}
   ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
+  ${mediaTag}
   </body></html>`);
   w.document.close();
   setTimeout(()=>{ w.focus(); w.print(); }, 500);
