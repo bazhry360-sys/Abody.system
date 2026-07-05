@@ -8,18 +8,18 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700;900&display=swap');
 :root{
-  --bg:#F1EFED;--bg2:#FFFFFF;--bg3:#E8E4DF;
-  --border:#E3DFDA;--border2:#C2D4D4;
-  --text:#3C4545;--muted:#697778;--muted2:#8B9899;
-  --primary:#A93A2A;--primary2:#C74634;--pl:rgba(199,70,52,0.08);
-  --sidebar:#2B3436;
-  --green:#2E7D32;--gbg:#E9F3E8;
-  --red:#A93226;--rbg:#F8EAE8;
-  --gold:#F1B13F;--ybg:#FDF3E1;
-  --blue:#4B6E91;--bbg:#EAEFF3;
-  --orange:#C2703D;--purple:#846A92;
-  --sh:0 1px 2px rgba(60,69,69,0.05),0 1px 3px rgba(60,69,69,0.07);
-  --shl:0 10px 28px rgba(60,69,69,0.14),0 2px 8px rgba(60,69,69,0.08);
+  --bg:#2B3436;--bg2:#333F41;--bg3:#232B2D;
+  --border:#3F4A4C;--border2:#4A575A;
+  --text:#ECEAE7;--muted:#9FACAD;--muted2:#6E7B7D;
+  --primary:#C25A47;--primary2:#DD6752;--pl:rgba(221,103,82,0.14);
+  --sidebar:#202829;
+  --green:#4CAF50;--gbg:rgba(76,175,80,0.12);
+  --red:#E2574A;--rbg:rgba(226,87,74,0.12);
+  --gold:#F1B13F;--ybg:rgba(241,177,63,0.12);
+  --blue:#7C9BB5;--bbg:rgba(124,155,181,0.12);
+  --orange:#D08A5C;--purple:#A78BB0;
+  --sh:0 1px 2px rgba(0,0,0,0.2),0 1px 4px rgba(0,0,0,0.25);
+  --shl:0 10px 28px rgba(0,0,0,0.4),0 2px 8px rgba(0,0,0,0.3);
 }
 table thead tr{background:rgba(0,0,0,0.03);}
 .sc,.rep-stat,.rc,.note-card{background:var(--bg2);}
@@ -333,8 +333,10 @@ nav{flex:1;padding:8px 7px;}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px;}
 .f{display:flex;flex-direction:column;gap:6px;}
 .f.full{grid-column:1/-1;}
-.f label{font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;letter-spacing:1.2px;}
-.f input,.f select,.f textarea{font-family:'Tajawal',sans-serif;font-size:13px;color:var(--text);background:var(--bg2);border:2px solid var(--border);border-radius:9px;padding:9px 12px;outline:none;transition:all .2s;}
+.f label{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;}
+.f input,.f select,.f textarea{font-family:'Tajawal',sans-serif;font-size:13px;color:#211D17;background:#F4F2EF;border:1.5px solid var(--border2);border-radius:9px;padding:9px 12px;outline:none;transition:all .2s;}
+.f input::placeholder,.f textarea::placeholder{color:#8B9491;}
+.f select option{background:#F4F2EF;color:#211D17;}
 .f input:focus,.f select:focus,.f textarea:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(169,58,42,.07);}
 .f select option{background:#fff;}
 .f textarea{resize:vertical;min-height:72px;}
@@ -662,16 +664,24 @@ tbody tr:hover{background:var(--bg3);}
               </div>
               <div class="f"><label>اسم العميل *</label><input type="text" id="o-c" list="coList" placeholder="اسم العميل أو الشركة" autocomplete="off"><datalist id="coList"></datalist></div>
               <div class="f full">
-                <label>📎 صورة الطلب الأصلي (اختياري)</label>
+                <label>📎 صورة أو ملف PDF للطلب الأصلي (اختياري)</label>
                 <div id="omPasteZone" tabindex="0" style="border:2px dashed var(--border2);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;outline:none;background:var(--bg2);">
-                  <p style="font-size:12px;color:var(--muted)"><strong style="color:var(--primary)">الصق (Ctrl+V)</strong> صورة ورقة الطلب من واتساب، أو <span onclick="event.stopPropagation();document.getElementById('omFileInput').click()" style="color:var(--primary);font-weight:700;cursor:pointer;text-decoration:underline">ارفعها من الجهاز</span></p>
-                  <input type="file" id="omFileInput" accept="image/*" onchange="handleOMFile(event)" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
+                  <p style="font-size:12px;color:var(--muted)"><strong style="color:var(--primary)">الصق (Ctrl+V)</strong> صورة أو PDF لورقة الطلب من واتساب، أو <span onclick="event.stopPropagation();document.getElementById('omFileInput').click()" style="color:var(--primary);font-weight:700;cursor:pointer;text-decoration:underline">ارفعها من الجهاز</span></p>
+                  <input type="file" id="omFileInput" accept="image/*,application/pdf" onchange="handleOMFile(event)" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
                 </div>
                 <div id="omPreviewWrap" style="display:none;margin-top:8px;">
                   <div style="position:relative;display:inline-block;">
                     <img id="omImg" style="max-width:220px;max-height:220px;border-radius:8px;border:1px solid var(--border);display:block;">
+                    <div id="omPdfBadge" style="display:none;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;">
+                      <span style="font-size:22px">📄</span><span style="font-size:12px;font-weight:700;color:var(--text)">ملف PDF مرفق</span>
+                    </div>
                     <button type="button" onclick="clearOMImage()" style="position:absolute;top:6px;left:6px;background:var(--red);color:#fff;border:none;border-radius:20px;width:24px;height:24px;cursor:pointer;font-size:11px;box-shadow:var(--sh)">✕</button>
                   </div>
+                  <button type="button" class="btn bg bsm" style="margin-top:8px" onclick="printOrderAttachment()">🖨️ طباعة الطلب مع الملاحظات</button>
+                </div>
+                <div class="f" style="margin-top:10px">
+                  <label>📝 ملاحظات</label>
+                  <textarea id="o-pnotes" placeholder="اكتب أي ملاحظة تحب تظهر بمربع واضح تحت الصورة عند الطباعة..." style="min-height:64px"></textarea>
                 </div>
               </div>
               <div class="f"><label>رقم المرجع <span style="font-size:10px;color:var(--green);font-weight:600">(تلقائي)</span></label>
@@ -680,7 +690,7 @@ tbody tr:hover{background:var(--bg3);}
                   <button onclick="genRef()" type="button" style="font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;padding:0 10px;border-radius:8px;background:var(--pl);color:var(--primary);border:1px solid rgba(169,58,42,.2);cursor:pointer;white-space:nowrap">🔄 توليد</button>
                 </div></div>
               <div class="f"><label>تاريخ الطلب *</label><input type="date" id="o-d"></div>
-              <div class="f full"><label>🗒️ ملاحظات</label><input type="text" id="o-gn" placeholder="ملاحظات إضافية..."></div>
+              <div class="f full"><label>📋 تفاصيل</label><input type="text" id="o-gn" placeholder="رقم طلب شراء، رقم فاتورة، أي تفاصيل مرجعية..."></div>
               <div class="f full"><label>حالة التسليم *</label>
                 <div class="rg rg4">
                   <label class="ro" id="ro-ok" onclick="setSt('ok')"><input type="radio">✅ تم التسليم</label>
@@ -862,14 +872,17 @@ tbody tr:hover{background:var(--bg3);}
             <div style="padding:16px">
               <div id="poPasteZone" tabindex="0" style="border:2px dashed var(--border2);border-radius:12px;padding:26px 16px;text-align:center;cursor:pointer;transition:all .2s;outline:none;">
                 <div style="font-size:30px;margin-bottom:8px">📋</div>
-                <p style="font-size:13px;font-weight:700;color:var(--text)">اضغط هنا ثم <strong style="color:var(--primary)">الصق (Ctrl+V)</strong> صورة الطلب</p>
+                <p style="font-size:13px;font-weight:700;color:var(--text)">اضغط هنا ثم <strong style="color:var(--primary)">الصق (Ctrl+V)</strong> صورة أو PDF للطلب</p>
                 <p style="font-size:11px;color:var(--muted);margin-top:4px">أو ارفعها من الجهاز</p>
-                <input type="file" id="poFileInput" accept="image/*" onchange="handlePOFile(event)" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
-                <button type="button" class="btn bg bsm" style="margin-top:10px" onclick="document.getElementById('poFileInput').click()">📁 اختر صورة</button>
+                <input type="file" id="poFileInput" accept="image/*,application/pdf" onchange="handlePOFile(event)" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;">
+                <button type="button" class="btn bg bsm" style="margin-top:10px" onclick="document.getElementById('poFileInput').click()">📁 اختر ملف</button>
               </div>
               <div id="poPreviewWrap" style="display:none;margin-top:14px;">
                 <div style="position:relative;display:inline-block;max-width:100%;">
                   <img id="poImg" style="max-width:100%;max-height:420px;border-radius:10px;border:1px solid var(--border);display:block;">
+                  <div id="poPdfBadge" style="display:none;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 18px;">
+                    <span style="font-size:24px">📄</span><span style="font-size:13px;font-weight:700;color:var(--text)">ملف PDF مرفق</span>
+                  </div>
                   <button onclick="clearPOImage()" style="position:absolute;top:8px;left:8px;background:var(--red);color:#fff;border:none;border-radius:20px;width:28px;height:28px;cursor:pointer;font-size:13px;box-shadow:var(--sh)">✕</button>
                 </div>
               </div>
@@ -2001,6 +2014,7 @@ async function saveO(){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
+  const pnotes=document.getElementById('o-pnotes')?.value.trim()||'';
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول وتحديد حالة التسليم',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
@@ -2019,7 +2033,7 @@ async function saveO(){
   const btnTxt=btn?btn.textContent:'';
   if(btn){btn.disabled=true;btn.style.opacity='.6';btn.style.cursor='not-allowed';btn.textContent='⏳ جارٍ الحفظ...';}
   try{
-    await db.collection('orders').add({rep,co,num,date,gnote,status:oSt,shorts,imgs:[...imgs],mainImg:mainOrderImg||null,createdAt:new Date().toISOString()});
+    await db.collection('orders').add({rep,co,num,date,gnote,pnotes,status:oSt,shorts,imgs:[...imgs],mainImg:mainOrderImg||null,createdAt:new Date().toISOString()});
     addLog(`إضافة طلب: ${co} — ${rep}`,'order');
     clrO();showT('✅ تم حفظ الطلب في قاعدة البيانات');
   }catch(err){showT('❌ خطأ في الحفظ: '+err.message,true);}
@@ -2033,6 +2047,7 @@ function clrO(){
   document.getElementById('o-c').value='';
   document.getElementById('o-n').value='';
   document.getElementById('o-gn').value='';
+  document.getElementById('o-pnotes').value='';
   document.getElementById('o-d').value=new Date().toISOString().split('T')[0];
   oSt='';imgs=[];
   clearOMImage();
@@ -2120,7 +2135,7 @@ function vO(id){
     <div class="mdr"><div class="lb">المرجع</div><span style="font-family:'IBM Plex Mono',monospace;color:var(--primary)">${o.num||'—'}</span></div>
     <div class="mdr"><div class="lb">التاريخ</div>${o.date}</div>
     <div class="mdr"><div class="lb">الحالة</div>${ob(o.status)}</div>
-    ${o.gnote?`<div class="mdr"><div class="lb">ملاحظات</div>${o.gnote}</div>`:''}
+    ${o.gnote?`<div class="mdr"><div class="lb">تفاصيل</div>${o.gnote}</div>`:''}
     ${o.mainImg?`<div style="margin-top:12px"><div style="font-size:11px;font-weight:800;color:var(--primary);margin-bottom:7px;text-transform:uppercase">📎 صورة الطلب الأصلي</div><img src="${o.mainImg}" onclick="window.open(this.src)" style="max-width:100%;border-radius:10px;border:1px solid var(--border);cursor:zoom-in"></div>`:''}
     ${o.shorts?.length?`<div style="margin-top:13px;padding:12px;background:var(--rbg);border-radius:10px;border:1px solid rgba(220,38,38,.12)">
       <div style="font-weight:800;color:var(--red);margin-bottom:9px;font-size:13px">⚠️ النواقص</div>
@@ -3372,6 +3387,7 @@ function editO(id){
   document.getElementById('o-n').value=o.num||'';
   document.getElementById('o-d').value=o.date||'';
   document.getElementById('o-gn').value=o.gnote||'';
+  document.getElementById('o-pnotes').value=o.pnotes||'';
   setSt(o.status||'ok');
   // Fill shorts — نحتفظ بها في الفورم حتى لو الحالة مش missing
   document.getElementById('sItems').innerHTML='';
@@ -3386,10 +3402,14 @@ function editO(id){
   // Set imgs
   imgs=[...(o.imgs||[])];
   document.getElementById('iPrev').innerHTML=imgs.map((im,i)=>`<div class="img-pw"><img src="${im}"><button class="rim" onclick="imgs.splice(${i},1);this.parentElement.remove()">✕</button></div>`).join('');
-  // Set main order image
+  // Set main order image / pdf
   if(o.mainImg){
     mainOrderImg=o.mainImg;
-    document.getElementById('omImg').src=o.mainImg;
+    mainOrderIsPdf = o.mainImg.startsWith('data:application/pdf');
+    const img=document.getElementById('omImg');
+    const badge=document.getElementById('omPdfBadge');
+    if(mainOrderIsPdf){ img.style.display='none'; badge.style.display='flex'; }
+    else { img.src=o.mainImg; img.style.display='block'; badge.style.display='none'; }
     document.getElementById('omPreviewWrap').style.display='block';
   } else {
     clearOMImage();
@@ -3412,6 +3432,7 @@ async function updateO(id){
   const num=document.getElementById('o-n').value.trim();
   const date=document.getElementById('o-d').value;
   const gnote=document.getElementById('o-gn').value.trim();
+  const pnotes=document.getElementById('o-pnotes')?.value.trim()||'';
   if(!rep||!co||!date||!oSt){showT('يرجى تعبئة جميع الحقول',true);return;}
   const shorts=[];
   document.querySelectorAll('.si-row').forEach(row=>{
@@ -3438,7 +3459,7 @@ async function updateO(id){
       const beforeCount=before.shorts?.length||0;
       if(beforeCount!==finalShorts.length)changes.push(`عدد الأصناف الناقصة: ${beforeCount} ← ${finalShorts.length}`);
     }
-    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,status:oSt,shorts:finalShorts,imgs:[...imgs],mainImg:mainOrderImg||null,updatedAt:new Date().toISOString(),updatedBy:CU.name});
+    await db.collection('orders').doc(id).update({rep,co,num,date,gnote,pnotes,status:oSt,shorts:finalShorts,imgs:[...imgs],mainImg:mainOrderImg||null,updatedAt:new Date().toISOString(),updatedBy:CU.name});
     const changeDesc=changes.length?` — التغييرات: ${changes.join('، ')}`:'';
     addLog(`تعديل طلب: ${co} — ${rep}${changeDesc}`,'order');
     clrO(); // clrO تعيد ضبط _editOrderId والزرار تلقائياً
@@ -3675,6 +3696,7 @@ Object.defineProperty(window,'REP_LINKS',{get:()=>customReps,configurable:true})
 
 // ===== PRINT ORDER FROM IMAGE (paste screenshot) =====
 let poImageData=null;
+let poIsPdf=false;
 function initPOPasteZone(){
   const zone=document.getElementById('poPasteZone');
   if(!zone || zone.dataset.bound) return;
@@ -3687,36 +3709,41 @@ function handlePOPaste(e){
   if(!cd) return;
   const items=cd.items||[];
   for(const item of items){
-    if(item.type && item.type.indexOf('image')!==-1){
+    if(item.type && (item.type.indexOf('image')!==-1 || item.type==='application/pdf')){
       e.preventDefault();
       const file=item.getAsFile();
       if(file) loadPOImageFile(file);
       return;
     }
   }
-  showT('ما فيه صورة بالنسخ — انسخ صورة الطلب من واتساب أولاً',true);
+  showT('ما فيه صورة أو PDF بالنسخ — انسخ من واتساب أولاً',true);
 }
 function handlePOFile(e){
   const file=e.target.files[0];
   if(file) loadPOImageFile(file);
 }
 function loadPOImageFile(file){
+  poIsPdf = file.type==='application/pdf' || /\.pdf$/i.test(file.name||'');
   const reader=new FileReader();
   reader.onload=ev=>{
     poImageData=ev.target.result;
-    document.getElementById('poImg').src=poImageData;
+    const img=document.getElementById('poImg');
+    const badge=document.getElementById('poPdfBadge');
+    if(poIsPdf){ img.style.display='none'; badge.style.display='flex'; }
+    else { img.src=poImageData; img.style.display='block'; badge.style.display='none'; }
     document.getElementById('poPreviewWrap').style.display='block';
     document.getElementById('poPasteZone').style.display='none';
     const btn=document.getElementById('poPrintBtn');
     btn.disabled=false; btn.style.opacity='';
-    showT('✅ تم إضافة الصورة');
+    showT(poIsPdf?'✅ تم إضافة ملف PDF':'✅ تم إضافة الصورة');
   };
-  reader.onerror=()=>showT('❌ فشل قراءة الصورة',true);
+  reader.onerror=()=>showT('❌ فشل قراءة الملف',true);
   reader.readAsDataURL(file);
 }
 function clearPOImage(){
-  poImageData=null;
-  const img=document.getElementById('poImg'); if(img)img.src='';
+  poImageData=null; poIsPdf=false;
+  const img=document.getElementById('poImg'); if(img){img.src='';img.style.display='block';}
+  const badge=document.getElementById('poPdfBadge'); if(badge)badge.style.display='none';
   document.getElementById('poPreviewWrap').style.display='none';
   document.getElementById('poPasteZone').style.display='block';
   const notesEl=document.getElementById('poNotes'); if(notesEl)notesEl.value='';
@@ -3725,33 +3752,39 @@ function clearPOImage(){
   btn.disabled=true; btn.style.opacity='.5';
 }
 function printPOOrder(){
-  if(!poImageData){showT('ألصق صورة الطلب أولاً',true);return;}
+  if(!poImageData){showT('ألصق صورة أو PDF الطلب أولاً',true);return;}
   const notes=(document.getElementById('poNotes').value||'').trim();
   const w=window.open('','_blank');
   if(!w){showT('السماح للنوافذ المنبثقة مطلوب للطباعة',true);return;}
   const dt=new Date().toLocaleString('ar-SA');
+  const mediaTag = poIsPdf
+    ? `<embed src="${poImageData}" type="application/pdf" class="doc">`
+    : `<img src="${poImageData}" class="doc">`;
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
   <style>
-    body{font-family:'Tajawal',Arial,sans-serif;padding:24px;color:#111;}
-    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #A93A2A;padding-bottom:10px;margin-bottom:18px;}
-    .h h1{font-size:18px;margin:0;color:#A93A2A;}
-    .h span{font-size:12px;color:#666;}
-    img{max-width:100%;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:18px;}
-    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:14px;background:#E9F3E8;}
-    .notes h3{margin:0 0 8px;font-size:13px;color:#A93A2A;}
-    .notes p{margin:0;font-size:13px;line-height:1.9;white-space:pre-wrap;}
-    @media print{ body{padding:10px;} }
+    *{box-sizing:border-box;}
+    body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
+    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
+    .h h1{font-size:16px;margin:0;color:#A93A2A;}
+    .h span{font-size:11px;color:#666;}
+    .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
+    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8;}
+    .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
+    .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
+    @page{ size:auto; margin:8mm; }
+    @media print{ body{padding:6px;} }
   </style></head><body>
   <div class="h"><h1>🚚 عبودي — طلب</h1><span>${dt}</span></div>
-  <img src="${poImageData}">
+  ${mediaTag}
   ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
   </body></html>`);
   w.document.close();
   setTimeout(()=>{ w.focus(); w.print(); }, 400);
 }
 
-// ===== ORDER MAIN IMAGE (paste original order photo into the order form) =====
+// ===== ORDER MAIN IMAGE / PDF (paste original order photo or PDF into the order form) =====
 let mainOrderImg=null;
+let mainOrderIsPdf=false;
 function initMainOrderPasteZone(){
   const zone=document.getElementById('omPasteZone');
   if(!zone || zone.dataset.bound) return;
@@ -3764,32 +3797,82 @@ function handleOMPaste(e){
   if(!cd) return;
   const items=cd.items||[];
   for(const item of items){
-    if(item.type && item.type.indexOf('image')!==-1){
+    if(item.type && (item.type.indexOf('image')!==-1 || item.type==='application/pdf')){
       e.preventDefault();
       const file=item.getAsFile();
       if(file) loadOMImageFile(file);
       return;
     }
   }
-  showT('ما فيه صورة بالنسخ',true);
+  showT('ما فيه صورة أو PDF بالنسخ',true);
 }
 function handleOMFile(e){
   const file=e.target.files[0];
   if(file) loadOMImageFile(file);
 }
 function loadOMImageFile(file){
+  const isPdf = file.type==='application/pdf' || /\.pdf$/i.test(file.name||'');
+  if(isPdf){
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      mainOrderImg=ev.target.result;
+      mainOrderIsPdf=true;
+      document.getElementById('omImg').style.display='none';
+      document.getElementById('omPdfBadge').style.display='flex';
+      document.getElementById('omPreviewWrap').style.display='block';
+      showT('✅ تم إرفاق ملف PDF');
+    };
+    reader.onerror=()=>showT('❌ خطأ في قراءة الملف',true);
+    reader.readAsDataURL(file);
+    return;
+  }
   compressImgToBase64(file, 1100, 0.75).then(b64=>{
     mainOrderImg=b64;
-    document.getElementById('omImg').src=b64;
+    mainOrderIsPdf=false;
+    const img=document.getElementById('omImg');
+    img.src=b64; img.style.display='block';
+    document.getElementById('omPdfBadge').style.display='none';
     document.getElementById('omPreviewWrap').style.display='block';
     showT('✅ تم إرفاق صورة الطلب');
   }).catch(err=>showT('❌ خطأ في معالجة الصورة: '+err.message,true));
 }
 function clearOMImage(){
-  mainOrderImg=null;
-  const img=document.getElementById('omImg'); if(img)img.src='';
+  mainOrderImg=null; mainOrderIsPdf=false;
+  const img=document.getElementById('omImg'); if(img){img.src='';img.style.display='block';}
+  const badge=document.getElementById('omPdfBadge'); if(badge)badge.style.display='none';
   const w=document.getElementById('omPreviewWrap'); if(w)w.style.display='none';
   const fi=document.getElementById('omFileInput'); if(fi)fi.value='';
+}
+function printOrderAttachment(){
+  if(!mainOrderImg){showT('ألصق أو ارفع صورة/PDF الطلب أولاً',true);return;}
+  const notes=(document.getElementById('o-pnotes')?.value||'').trim();
+  const co=(document.getElementById('o-c')?.value||'').trim();
+  const w=window.open('','_blank');
+  if(!w){showT('السماح للنوافذ المنبثقة مطلوب للطباعة',true);return;}
+  const dt=new Date().toLocaleString('ar-SA');
+  const mediaTag = mainOrderIsPdf
+    ? `<embed src="${mainOrderImg}" type="application/pdf" class="doc">`
+    : `<img src="${mainOrderImg}" class="doc">`;
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
+  <style>
+    *{box-sizing:border-box;}
+    body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
+    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
+    .h h1{font-size:16px;margin:0;color:#A93A2A;}
+    .h span{font-size:11px;color:#666;}
+    .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
+    .notes{border:1.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8;}
+    .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
+    .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
+    @page{ size:auto; margin:8mm; }
+    @media print{ body{padding:6px;} }
+  </style></head><body>
+  <div class="h"><h1>🚚 عبودي — طلب${co?': '+co:''}</h1><span>${dt}</span></div>
+  ${mediaTag}
+  ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 500);
 }
 
 // ===== CUSTOMER NAME AUTOCOMPLETE =====
