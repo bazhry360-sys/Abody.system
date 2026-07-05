@@ -3758,30 +3758,49 @@ function clearPOImage(){
 function printPOOrder(){
   if(!poImageData){showT('ألصق صورة أو PDF الطلب أولاً',true);return;}
   const notes=(document.getElementById('poNotes').value||'').trim();
+  if(poIsPdf){
+    // PDFs printed via <embed> can hijack the print job in some browsers,
+    // so we print the notes page normally and open the PDF separately.
+    printNotesOnlyPage(notes);
+    const pw=window.open(poImageData,'_blank');
+    if(!pw) showT('افتح النوافذ المنبثقة عشان تقدر تطبع ملف الـ PDF المرفق',true);
+    return;
+  }
   const w=window.open('','_blank');
   if(!w){showT('السماح للنوافذ المنبثقة مطلوب للطباعة',true);return;}
-  const dt=new Date().toLocaleString('ar-SA');
-  const mediaTag = poIsPdf
-    ? `<embed src="${poImageData}" type="application/pdf" class="doc">`
-    : `<img src="${poImageData}" class="doc">`;
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
   <style>
     *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     html,body{background:#fff !important;}
     body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
-    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
-    .h h1{font-size:16px;margin:0;color:#A93A2A;}
-    .h span{font-size:11px;color:#666;}
-    .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
+    .doc{width:100%;height:${notes?'70vh':'90vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
     .notes{border:2.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#E9F3E8 !important;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
     @media print{ body{padding:6px;} }
   </style></head><body>
-  <div class="h"><h1>🚚 عبودي — طلب</h1><span>${dt}</span></div>
   ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
-  ${mediaTag}
+  <img src="${poImageData}" class="doc">
+  </body></html>`);
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 400);
+}
+function printNotesOnlyPage(notes){
+  const w=window.open('','_blank');
+  if(!w){showT('السماح للنوافذ المنبثقة مطلوب للطباعة',true);return;}
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>ملاحظات الطلب</title>
+  <style>
+    *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    html,body{background:#fff !important;}
+    body{font-family:'Tajawal',Arial,sans-serif;padding:20px;color:#111;margin:0;}
+    .notes{border:2.5px solid #A93A2A;border-radius:8px;padding:14px 18px;background:#E9F3E8 !important;}
+    .notes h3{margin:0 0 8px;font-size:14px;color:#A93A2A;}
+    .notes p{margin:0;font-size:13px;line-height:1.8;white-space:pre-wrap;}
+    @page{ size:auto; margin:10mm; }
+  </style></head><body>
+  <div class="notes"><h3>📝 ملاحظات</h3><p>${(notes||'—').replace(/</g,'&lt;')}</p></div>
+  <p style="margin-top:14px;font-size:11px;color:#999">📄 ملف الطلب (PDF) بيفتح بتبويب منفصل للطباعة</p>
   </body></html>`);
   w.document.close();
   setTimeout(()=>{ w.focus(); w.print(); }, 400);
@@ -3851,31 +3870,30 @@ function clearOMImage(){
 function printOrderAttachment(){
   if(!mainOrderImg){showT('ألصق أو ارفع صورة/PDF الطلب أولاً',true);return;}
   const notes=(document.getElementById('o-pnotes')?.value||'').trim();
-  const co=(document.getElementById('o-c')?.value||'').trim();
+  if(mainOrderIsPdf){
+    // PDFs printed via <embed> can hijack the print job in some browsers,
+    // so we print the notes page normally and open the PDF separately.
+    printNotesOnlyPage(notes);
+    const pw=window.open(mainOrderImg,'_blank');
+    if(!pw) showT('افتح النوافذ المنبثقة عشان تقدر تطبع ملف الـ PDF المرفق',true);
+    return;
+  }
   const w=window.open('','_blank');
   if(!w){showT('السماح للنوافذ المنبثقة مطلوب للطباعة',true);return;}
-  const dt=new Date().toLocaleString('ar-SA');
-  const mediaTag = mainOrderIsPdf
-    ? `<embed src="${mainOrderImg}" type="application/pdf" class="doc">`
-    : `<img src="${mainOrderImg}" class="doc">`;
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>طباعة طلب</title>
   <style>
     *{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     html,body{background:#fff !important;}
     body{font-family:'Tajawal',Arial,sans-serif;padding:16px;color:#111;margin:0;}
-    .h{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #A93A2A;padding-bottom:8px;margin-bottom:12px;}
-    .h h1{font-size:16px;margin:0;color:#A93A2A;}
-    .h span{font-size:11px;color:#666;}
-    .doc{width:100%;height:${notes?'62vh':'82vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
+    .doc{width:100%;height:${notes?'70vh':'90vh'};object-fit:contain;border:1px solid #ddd;border-radius:8px;display:block;margin-bottom:10px;}
     .notes{border:2.5px solid #A93A2A;border-radius:8px;padding:10px 14px;background:#F8EAE8 !important;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     .notes h3{margin:0 0 6px;font-size:12px;color:#A93A2A;}
     .notes p{margin:0;font-size:12px;line-height:1.7;white-space:pre-wrap;}
     @page{ size:auto; margin:8mm; }
     @media print{ body{padding:6px;} }
   </style></head><body>
-  <div class="h"><h1>🚚 عبودي — طلب${co?': '+co:''}</h1><span>${dt}</span></div>
   ${notes?`<div class="notes"><h3>📝 ملاحظات</h3><p>${notes.replace(/</g,'&lt;')}</p></div>`:''}
-  ${mediaTag}
+  <img src="${mainOrderImg}" class="doc">
   </body></html>`);
   w.document.close();
   setTimeout(()=>{ w.focus(); w.print(); }, 500);
