@@ -396,7 +396,13 @@ thead tr{background:var(--bg2);}
 th{padding:10px 13px;font-size:10px;font-weight:800;color:var(--muted);text-align:right;white-space:nowrap;letter-spacing:.7px;text-transform:uppercase;border-bottom:1px solid var(--border);}
 td{padding:11px 13px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
 tr:last-child td{border-bottom:none;}
-tbody tr:hover{background:var(--bg3);}
+tbody tr:hover{background:var(--pl);}
+.row-flash{animation:rowFlash 2.2s ease;}
+@keyframes rowFlash{
+  0%{box-shadow:inset 0 0 0 9999px rgba(199,70,52,.28);}
+  15%{box-shadow:inset 0 0 0 9999px rgba(199,70,52,.28);}
+  100%{box-shadow:inset 0 0 0 9999px rgba(199,70,52,0);}
+}
 .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:800;}
 .bgg{background:var(--gbg);color:var(--green);border:1px solid rgba(5,150,105,.15);}
 .bgd{background:var(--rbg);color:var(--red);border:1px solid rgba(220,38,38,.15);}
@@ -476,7 +482,7 @@ tbody tr:hover{background:var(--bg3);}
 .gs-group{margin-bottom:6px;}
 .gs-group-title{font-size:10px;font-weight:800;color:var(--muted2);text-transform:uppercase;letter-spacing:1.5px;padding:8px 10px 4px;}
 .gs-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:10px;cursor:pointer;transition:all .15s;}
-.gs-item:hover{background:var(--bg3);}
+.gs-item:hover{background:var(--pl);}
 .gs-item-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;background:var(--pl);border:1px solid var(--border);}
 .gs-item-main{flex:1;min-width:0;}
 .gs-item-title{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -812,6 +818,10 @@ tbody tr:hover{background:var(--bg3);}
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <input type="text" id="allShortsSearch" placeholder="🔍 بحث (عميل / صنف)" oninput="renderAllShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;min-width:140px">
                 <select id="allShortsRepFilter" onchange="renderAllShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;"></select>
+                <select id="allShortsSort" onchange="renderAllShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;">
+                  <option value="new">🔽 الأحدث أولاً</option>
+                  <option value="old">🔼 الأقدم أولاً</option>
+                </select>
                 <button class="btn bg bsm" onclick="printAllShorts()">🖨️ طباعة</button>
                 <button class="btn bbl bsm" onclick="exportXL('allshorts')">📥 Excel</button>
               </div>
@@ -835,6 +845,11 @@ tbody tr:hover{background:var(--bg3);}
               <div style="display:flex;gap:6px;flex-wrap:wrap">
                 <input type="text" id="arrivedShortsSearch" placeholder="🔍 بحث (عميل / صنف)" oninput="renderArrivedShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;min-width:140px">
                 <select id="arrivedShortsRepFilter" onchange="renderArrivedShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;"></select>
+                <select id="arrivedShortsPrintFilter" onchange="renderArrivedShortsTable()" style="font-family:'Tajawal',sans-serif;font-size:12px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);outline:none;">
+                  <option value="">كل الحالات</option>
+                  <option value="printed">🖨️ تمت الطباعة</option>
+                  <option value="notprinted">⬜ غير مطبوعة</option>
+                </select>
               </div>
             </div>
             <div class="tw">
@@ -2116,7 +2131,7 @@ function rO(){
     const notesTxt=[o.gnote,...itemNotes2].filter(Boolean).join('، ');
     const ageNum=daysAgoNum(o.date);
     const isOldMissing=o.status==='missing'&&ageNum>=SHORT_AGING_DAYS;
-    return `<tr${isOldMissing?' style="background:rgba(220,38,38,0.04)"':''}>
+    return `<tr data-row-id="${o.id}"${isOldMissing?' style="background:rgba(220,38,38,0.04)"':''}>
     <td style="font-size:12px;color:var(--muted)">${o.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${daysAgoLbl(o.date)}</div></td>
     <td style="font-size:12px;max-width:160px;font-weight:${notesTxt?'700':'400'};color:${o.status==='missing'?'#A93226':o.status==='review'?'#F1B13F':o.status==='ok'?'#2E7D32':'var(--muted)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${notesTxt.replace(/"/g,'&quot;')}">${notesTxt||'—'}</td>
     <td><strong>${o.rep}</strong></td><td>${o.co}</td>
@@ -2409,6 +2424,11 @@ function renderAllShortsTable(){
     (r.note||'').toLowerCase().includes(searchVal) ||
     (r.rep||'').toLowerCase().includes(searchVal)
   );
+  const sortVal=document.getElementById('allShortsSort')?.value||'new';
+  rows.sort((a,b)=> sortVal==='old'
+    ? new Date(a.date) - new Date(b.date)
+    : new Date(b.date) - new Date(a.date)
+  );
 
   if(!rows.length){
     tbody.innerHTML='';
@@ -2416,7 +2436,7 @@ function renderAllShortsTable(){
     return;
   }
   if(empty)empty.style.display='none';
-  tbody.innerHTML=rows.map((r,i)=>`<tr>
+  tbody.innerHTML=rows.map((r,i)=>`<tr data-row-id="sh_${r.oid}_${r.si}">
       <td style="text-align:center;color:var(--muted);font-weight:700">${i+1}</td>
       <td style="font-size:12px;color:var(--muted)">${r.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${r.days}</div></td>
       <td>${r.rep}</td><td>${r.co}</td>
@@ -2434,12 +2454,15 @@ function renderArrivedShortsTable(){
   if(!card)return;
   fillRepFilter('arrivedShortsRepFilter');
   const repVal=document.getElementById('arrivedShortsRepFilter')?.value||'';
+  const printVal=document.getElementById('arrivedShortsPrintFilter')?.value||'';
   const searchVal=(document.getElementById('arrivedShortsSearch')?.value||'').trim().toLowerCase();
   const tbody=document.getElementById('arrivedShortsTbody');
   const empty=document.getElementById('arrivedShortsEmpty');
 
   let rows=getAllShortRows().filter(r=>r.arrived);
   if(repVal) rows=rows.filter(r=>r.rep===repVal);
+  if(printVal==='printed') rows=rows.filter(r=>r.printed);
+  if(printVal==='notprinted') rows=rows.filter(r=>!r.printed);
   if(searchVal) rows=rows.filter(r=>
     (r.co||'').toLowerCase().includes(searchVal) ||
     (r.name||'').toLowerCase().includes(searchVal) ||
@@ -2455,7 +2478,7 @@ function renderArrivedShortsTable(){
     return;
   }
   if(empty)empty.style.display='none';
-  tbody.innerHTML=rows.map(r=>`<tr style="${r.printed?'opacity:.55':''}">
+  tbody.innerHTML=rows.map(r=>`<tr data-row-id="sh_${r.oid}_${r.si}" style="${r.printed?'opacity:.55':''}">
       <td style="font-size:12px;color:var(--muted)">${r.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${r.days}</div></td>
       <td>${r.rep}</td><td>${r.co}</td>
       <td><strong>${r.name}</strong></td>
@@ -2870,7 +2893,7 @@ function rSp(){
   if(!tb)return;
   if(!d.length){tb.innerHTML='';if(em)em.style.display='block';return;}
   if(em)em.style.display='none';
-  tb.innerHTML=d.map((s,i)=>`<tr>
+  tb.innerHTML=d.map((s,i)=>`<tr data-row-id="${s.id}">
     <td style="font-size:12px;color:var(--muted)">${s.date}</td>
     <td><strong>${s.nm}</strong>${s.cn?`<br><span style="font-size:11px;color:var(--muted)">${s.cn}</span>`:''}</td>
     <td style="font-size:12px;color:var(--muted)">${s.pn||'—'}</td>
@@ -4068,7 +4091,7 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ closeSearch(); }
 });
 
-function gsGoTo(panel, prefillId, val){
+function gsGoTo(panel, prefillId, val, rowId){
   closeSearch();
   const ni=[...document.querySelectorAll('.ni')].find(x=>(x.getAttribute('onclick')||'').includes(`gp('${panel}'`));
   if(ni) gp(panel, ni);
@@ -4076,8 +4099,18 @@ function gsGoTo(panel, prefillId, val){
     setTimeout(()=>{
       const el=document.getElementById(prefillId);
       if(el){ el.value=val; el.dispatchEvent(new Event('input')); el.dispatchEvent(new Event('change')); }
+      if(rowId) setTimeout(()=>highlightRow(rowId), 150);
     },100);
+  } else if(rowId){
+    setTimeout(()=>highlightRow(rowId), 200);
   }
+}
+function highlightRow(id){
+  const row=document.querySelector(`[data-row-id="${id}"]`);
+  if(!row) return;
+  row.scrollIntoView({behavior:'smooth', block:'center'});
+  row.classList.add('row-flash');
+  setTimeout(()=>row.classList.remove('row-flash'), 2200);
 }
 
 function runGlobalSearch(q){
@@ -4099,10 +4132,18 @@ function runGlobalSearch(q){
 
   const repHits=Object.keys(typeof customReps!=='undefined'&&customReps?customReps:{}).filter(n=>n.toLowerCase().includes(q)).slice(0,6);
 
+  const shortHits=getAllShortRows().filter(r=>
+    (r.name||'').toLowerCase().includes(q)||
+    (r.co||'').toLowerCase().includes(q)||
+    (r.rep||'').toLowerCase().includes(q)||
+    (r.note||'').toLowerCase().includes(q)||
+    (r.shad||'').toLowerCase().includes(q)
+  ).slice(0,6);
+
   let html='';
   if(orderHits.length){
     html+=`<div class="gs-group"><div class="gs-group-title">الطلبات</div>`+
-      orderHits.map(o=>`<div class="gs-item" onclick="gsGoTo('orders','os','${(o.co||'').replace(/'/g,"\\'")}')">
+      orderHits.map(o=>`<div class="gs-item" onclick="gsGoTo('orders','os','${(o.co||'').replace(/'/g,"\\'")}','${o.id}')">
         <div class="gs-item-ico">📦</div>
         <div class="gs-item-main"><div class="gs-item-title">${o.co||'—'}</div><div class="gs-item-sub">${o.rep||''} · ${o.date||''}</div></div>
         <div class="gs-item-tag">${o.num||''}</div>
@@ -4110,7 +4151,7 @@ function runGlobalSearch(q){
   }
   if(shipHits.length){
     html+=`<div class="gs-group"><div class="gs-group-title">الشحنات</div>`+
-      shipHits.map(s=>`<div class="gs-item" onclick="gsGoTo('ships','shs','${(s.bl||s.nm||'').replace(/'/g,"\\'")}')">
+      shipHits.map(s=>`<div class="gs-item" onclick="gsGoTo('ships','sps','${(s.bl||s.nm||'').replace(/'/g,"\\'")}','${s.id}')">
         <div class="gs-item-ico">🚚</div>
         <div class="gs-item-main"><div class="gs-item-title">${s.nm||s.bl||'—'}</div><div class="gs-item-sub">${s.bl||''} · ${s.dest||''}</div></div>
         <div class="gs-item-tag">${s.status||''}</div>
@@ -4121,6 +4162,14 @@ function runGlobalSearch(q){
       repHits.map(n=>`<div class="gs-item" onclick="gsGoTo('managereps')">
         <div class="gs-item-ico">👤</div>
         <div class="gs-item-main"><div class="gs-item-title">${n}</div></div>
+      </div>`).join('')+`</div>`;
+  }
+  if(shortHits.length){
+    html+=`<div class="gs-group"><div class="gs-group-title">النواقص</div>`+
+      shortHits.map(r=>`<div class="gs-item" onclick="gsGoTo('${r.arrived?'shortsarr':'shortscur'}','${r.arrived?'arrivedShortsSearch':'allShortsSearch'}','${(r.name||'').replace(/'/g,"\\'")}','sh_${r.oid}_${r.si}')">
+        <div class="gs-item-ico">${r.arrived?'📦':'⚠️'}</div>
+        <div class="gs-item-main"><div class="gs-item-title">${r.name||'—'}</div><div class="gs-item-sub">${r.co||''} · ${r.rep||''}</div></div>
+        <div class="gs-item-tag">${r.arrived?'وصلت':'ناقصة'}</div>
       </div>`).join('')+`</div>`;
   }
   box.innerHTML = html || '<div class="gs-empty">لا نتائج مطابقة 🤷‍♂️</div>';
