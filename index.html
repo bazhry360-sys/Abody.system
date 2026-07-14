@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>عبودي — إدارة الطلبات والشحنات</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700;900&display=swap');
 :root{
@@ -968,31 +970,49 @@ tbody tr:hover{background:var(--pl);}
         <!-- DRIVERS -->
         <div class="panel" id="p-drivers">
           <div class="ph"><h2>🚛 سواقين</h2><p>تحديث مواقع العملاء عبر روابط الواتساب / خرائط جوجل</p><div class="ph-ln"></div></div>
-          <div class="card" style="max-width:640px">
-            <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>📍 لصق رابط لوكيشن الواتساب / خرائط جوجل</div></div>
-            <div style="padding:16px">
-              <div class="f">
-                <label>اختر الشحنة</label>
-                <select id="dr-ship-select" style="font-family:'Tajawal',sans-serif">
-                  <option value="">— اختر شحنة لتحديث موقعها —</option>
-                </select>
-              </div>
-              <div class="f full" style="margin-top:12px">
-                <label>📍 الصق الرابط هنا</label>
-                <input type="text" id="dr-loc-paste" placeholder="رابط واتساب أو خرائط جوجل... سيتم استخراج الإحداثيات تلقائياً" oninput="parseDriverLocationUrl(this.value)" style="direction:ltr">
-                <div id="dr-loc-status" style="font-size:12px;margin-top:6px;min-height:18px;font-weight:700"></div>
-                <input type="hidden" id="dr-lat">
-                <input type="hidden" id="dr-lng">
-              </div>
-              <div class="fa" style="padding:14px 0 0;border:none;justify-content:flex-start">
-                <button class="btn bp" onclick="saveDriverLocation()">💾 حفظ الموقع للشحنة المختارة</button>
-              </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap-reverse;align-items:flex-start">
+            <!-- Map (left side) -->
+            <div class="card" style="flex:1;min-width:300px;padding:0;overflow:hidden">
+              <div id="drMap" style="width:100%;height:420px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">📍 الصق رابط لوكيشن عشان يبين هنا</div>
             </div>
-          </div>
-          <div class="card" style="max-width:640px">
-            <div class="ch"><div class="ct"><div class="cd" style="background:var(--gold)"></div>📋 المواقع المحفوظة مؤخراً</div></div>
-            <div style="padding:16px" id="dr-recent-locs">
-              <div class="empty"><div class="ei">📍</div><p>لا توجد مواقع محفوظة بعد</p></div>
+            <!-- Form (right side) -->
+            <div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:16px">
+              <div class="card">
+                <div class="ch"><div class="ct"><div class="cd" style="background:var(--primary)"></div>📍 لصق رابط لوكيشن الواتساب / خرائط جوجل</div></div>
+                <div style="padding:16px">
+                  <div class="f">
+                    <label>اختر الشحنة <span style="font-weight:400;text-transform:none;letter-spacing:0">(اختياري)</span></label>
+                    <select id="dr-ship-select" style="font-family:'Tajawal',sans-serif" onchange="onDrShipSelect()">
+                      <option value="">— بدون ربط بشحنة —</option>
+                    </select>
+                  </div>
+                  <div class="f" style="margin-top:12px">
+                    <label>👤 اسم العميل أو الشركة</label>
+                    <input type="text" id="dr-customer" list="drCustomerList" placeholder="اسم العميل أو الشركة" autocomplete="off">
+                    <datalist id="drCustomerList"></datalist>
+                  </div>
+                  <div class="f" style="margin-top:12px">
+                    <label>📱 رقم جوال المستلم</label>
+                    <input type="tel" id="dr-phone" placeholder="05xxxxxxxx" style="direction:ltr;text-align:left">
+                  </div>
+                  <div class="f full" style="margin-top:12px">
+                    <label>📍 الصق الرابط هنا</label>
+                    <input type="text" id="dr-loc-paste" placeholder="رابط واتساب أو خرائط جوجل... سيتم استخراج الإحداثيات تلقائياً" oninput="parseDriverLocationUrl(this.value)" style="direction:ltr">
+                    <div id="dr-loc-status" style="font-size:12px;margin-top:6px;min-height:18px;font-weight:700"></div>
+                    <input type="hidden" id="dr-lat">
+                    <input type="hidden" id="dr-lng">
+                  </div>
+                  <div class="fa" style="padding:14px 0 0;border:none;justify-content:flex-start">
+                    <button class="btn bp" onclick="saveDriverLocation()">💾 حفظ الموقع</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card">
+                <div class="ch"><div class="ct"><div class="cd" style="background:var(--gold)"></div>📋 المواقع المحفوظة مؤخراً</div></div>
+                <div style="padding:16px" id="dr-recent-locs">
+                  <div class="empty"><div class="ei">📍</div><p>لا توجد مواقع محفوظة بعد</p></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1801,7 +1821,7 @@ function gp(n,el){
   if(n==='bi')renderBI();
   // Purchase: show cards, admin: show table
   if(n==='shipview') svLoad();
-  if(n==='drivers'){ fillDriverShipSelect(); renderRecentDriverLocs(); }
+  if(n==='drivers'){ fillDriverShipSelect(); renderRecentDriverLocs(); setTimeout(()=>{ initDrMap(); if(drMapInstance) drMapInstance.invalidateSize(); },100); }
   if(n==='shorts'){
     const isP=CU.role==='purchase';
     document.getElementById('shortCardsWrap').style.display=isP?'block':'none';
@@ -2756,7 +2776,26 @@ function parseLocationUrl(url){
   latEl.value='';lngEl.value='';
 }
 
-// ===== صفحة سواقين — أداة لصق اللوكيشن المستقلة =====
+// ===== صفحة سواقين — أداة لصق اللوكيشن المستقلة + خريطة أقمار صناعية =====
+let drMapInstance=null, drMapMarker=null;
+function initDrMap(){
+  const el=document.getElementById('drMap');
+  if(!el || drMapInstance || typeof L==='undefined') return;
+  el.textContent='';
+  drMapInstance=L.map('drMap',{zoomControl:true,attributionControl:false}).setView([24.7136,46.6753],11); // الرياض افتراضياً
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+    maxZoom:19
+  }).addTo(drMapInstance);
+}
+function showDrMapPin(lat,lng,label){
+  initDrMap();
+  if(!drMapInstance) return;
+  if(drMapMarker) drMapInstance.removeLayer(drMapMarker);
+  drMapMarker=L.marker([lat,lng]).addTo(drMapInstance);
+  if(label) drMapMarker.bindPopup(label).openPopup();
+  drMapInstance.setView([lat,lng],15);
+  setTimeout(()=>drMapInstance.invalidateSize(),150);
+}
 function parseDriverLocationUrl(url){
   const statusEl=document.getElementById('dr-loc-status');
   const latEl=document.getElementById('dr-lat');
@@ -2767,58 +2806,97 @@ function parseDriverLocationUrl(url){
   if(r){
     latEl.value=r.lat;lngEl.value=r.lng;
     statusEl.innerHTML=`✅ <span style="color:var(--green)">تم استخراج الإحداثيات: ${r.lat.toFixed(6)}, ${r.lng.toFixed(6)}</span> — <a href="https://maps.google.com/?q=${r.lat},${r.lng}" target="_blank" style="color:var(--blue);font-size:10px">تحقق ↗</a>`;
+    showDrMapPin(r.lat,r.lng,document.getElementById('dr-customer')?.value||'الموقع الملصق');
     return;
   }
   statusEl.innerHTML='<span style="color:var(--red)">⚠️ لم يتم التعرف على الرابط — جرب نسخ الرابط من خرائط جوجل مباشرة</span>';
   latEl.value='';lngEl.value='';
 }
-
+function onDrShipSelect(){
+  const shipId=document.getElementById('dr-ship-select')?.value;
+  const s=ships.find(x=>x.id===shipId);
+  if(s){
+    document.getElementById('dr-customer').value=s.nm||'';
+    document.getElementById('dr-phone').value=s.rn||'';
+    if(s.lat&&s.lng) showDrMapPin(s.lat,s.lng,s.nm||'');
+  }
+}
 function fillDriverShipSelect(){
   const sel=document.getElementById('dr-ship-select');
   if(!sel)return;
   const cur=sel.value;
   const sorted=[...ships].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-  sel.innerHTML='<option value="">— اختر شحنة لتحديث موقعها —</option>'+
+  sel.innerHTML='<option value="">— بدون ربط بشحنة —</option>'+
     sorted.map(s=>`<option value="${s.id}">${s.nm||'—'} — ${s.bl||'—'} (${s.date||''})</option>`).join('');
   if(cur)sel.value=cur;
+  // Customer name autocomplete list — pulled from historical ship customer names
+  const dl=document.getElementById('drCustomerList');
+  if(dl){
+    const names=[...new Set(ships.map(s=>s.nm).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ar'));
+    dl.innerHTML=names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">`).join('');
+  }
 }
-
 async function saveDriverLocation(){
   const shipId=document.getElementById('dr-ship-select')?.value;
+  const customer=(document.getElementById('dr-customer')?.value||'').trim();
+  const phone=(document.getElementById('dr-phone')?.value||'').trim();
   const lat=document.getElementById('dr-lat')?.value;
   const lng=document.getElementById('dr-lng')?.value;
-  if(!shipId){showT('يرجى اختيار الشحنة أولاً',true);return;}
   if(!lat||!lng){showT('يرجى لصق رابط لوكيشن صحيح أولاً',true);return;}
+  if(!shipId && !customer){showT('اختر شحنة أو اكتب اسم العميل على الأقل',true);return;}
   if(!db){showT('❌ لا يوجد اتصال بقاعدة البيانات',true);return;}
   try{
-    await db.collection('ships').doc(shipId).update({lat:parseFloat(lat),lng:parseFloat(lng),locUpdatedAt:new Date().toISOString()});
-    const s=ships.find(x=>x.id===shipId);
-    addLog(`تحديث موقع العميل: ${s?.nm||shipId}`,'ship');
+    if(shipId){
+      const upd={lat:parseFloat(lat),lng:parseFloat(lng),locUpdatedAt:new Date().toISOString()};
+      if(customer) upd.nm=customer;
+      if(phone) upd.rn=phone;
+      await db.collection('ships').doc(shipId).update(upd);
+      const s=ships.find(x=>x.id===shipId);
+      addLog(`تحديث موقع العميل: ${s?.nm||customer||shipId}`,'ship');
+    } else {
+      // No linked shipment — save as a standalone location log entry
+      await db.collection('driverLocations').add({
+        customer, phone, lat:parseFloat(lat), lng:parseFloat(lng),
+        createdAt:new Date().toISOString(), createdBy:CU?.name||''
+      });
+      addLog(`تسجيل موقع بدون شحنة: ${customer}`,'ship');
+    }
     showT('✅ تم حفظ موقع العميل بنجاح');
     document.getElementById('dr-loc-paste').value='';
     document.getElementById('dr-loc-status').textContent='';
     document.getElementById('dr-lat').value='';
     document.getElementById('dr-lng').value='';
     document.getElementById('dr-ship-select').value='';
+    document.getElementById('dr-customer').value='';
+    document.getElementById('dr-phone').value='';
     renderRecentDriverLocs();
   }catch(err){showT('❌ خطأ: '+err.message,true);}
 }
 
-function renderRecentDriverLocs(){
+async function renderRecentDriverLocs(){
   const wrap=document.getElementById('dr-recent-locs');
   if(!wrap)return;
-  const withLoc=ships.filter(s=>s.lat&&s.lng).sort((a,b)=>(b.locUpdatedAt||'').localeCompare(a.locUpdatedAt||'')).slice(0,10);
-  if(!withLoc.length){
+  const withLoc=ships.filter(s=>s.lat&&s.lng).map(s=>({nm:s.nm,sub:s.bl,lat:s.lat,lng:s.lng,t:s.locUpdatedAt||''}));
+  let standalone=[];
+  if(db){
+    try{
+      const snap=await db.collection('driverLocations').orderBy('createdAt','desc').limit(10).get();
+      standalone=snap.docs.map(d=>{const x=d.data();return {nm:x.customer,sub:x.phone,lat:x.lat,lng:x.lng,t:x.createdAt||''};});
+    }catch(e){/* بدون index قد يفشل، نتجاهل بصمت */}
+  }
+  const all=[...withLoc,...standalone].sort((a,b)=>(b.t||'').localeCompare(a.t||'')).slice(0,10);
+  if(!all.length){
     wrap.innerHTML='<div class="empty"><div class="ei">📍</div><p>لا توجد مواقع محفوظة بعد</p></div>';
     return;
   }
-  wrap.innerHTML=withLoc.map(s=>`
+  wrap.innerHTML=all.map(s=>`
     <div style="background:var(--bg2);border:1.5px solid var(--border);border-radius:11px;padding:11px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:800">${s.nm||'—'}</div>
-        <div style="font-size:11px;color:var(--muted);font-family:monospace">${s.bl||'—'} — ${parseFloat(s.lat).toFixed(5)}, ${parseFloat(s.lng).toFixed(5)}</div>
+        <div style="font-size:11px;color:var(--muted);font-family:monospace">${s.sub||'—'} — ${parseFloat(s.lat).toFixed(5)}, ${parseFloat(s.lng).toFixed(5)}</div>
       </div>
-      <a href="https://maps.google.com/?q=${s.lat},${s.lng}" target="_blank" class="btn bg bxs">🗺️ خريطة</a>
+      <button type="button" class="btn bg bxs" onclick="showDrMapPin(${s.lat},${s.lng},'${(s.nm||'').replace(/'/g,"\\'")}')">📍 بالخريطة</button>
+      <a href="https://maps.google.com/?q=${s.lat},${s.lng}" target="_blank" class="btn bg bxs">🗺️ جوجل</a>
     </div>`).join('');
 }
 
