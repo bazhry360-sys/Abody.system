@@ -824,13 +824,15 @@ tbody tr:hover{background:var(--pl);}
                   <option value="new">🔽 الأحدث أولاً</option>
                   <option value="old">🔼 الأقدم أولاً</option>
                 </select>
-                <button class="btn bg bsm" onclick="printAllShorts()">🖨️ طباعة</button>
+                <button class="btn bg bsm" id="shSelectAllBtn" onclick="toggleSelectAllShorts()">☑️ تحديد الكل</button>
+                <button class="btn bp bsm" id="shPrintSelBtn" onclick="printSelectedShorts()" style="display:none">🖨️ طباعة المحدد (<span id="shSelCount">0</span>)</button>
+                <button class="btn bg bsm" onclick="printAllShorts()">🖨️ طباعة الكل</button>
                 <button class="btn bbl bsm" onclick="exportXL('allshorts')">📥 Excel</button>
               </div>
             </div>
             <div class="tw">
               <table id="allShortsTbl">
-                <thead><tr><th>م</th><th>التاريخ</th><th>المندوب</th><th>العميل</th><th>الصنف</th><th>الشد</th><th>الكمية</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
+                <thead><tr><th style="width:34px"></th><th>م</th><th>التاريخ</th><th>المندوب</th><th>العميل</th><th>الصنف</th><th>الشد</th><th>الكمية</th><th>ملاحظات</th><th>إجراء</th></tr></thead>
                 <tbody id="allShortsTbody"></tbody>
               </table>
               <div class="empty" id="allShortsEmpty" style="display:none"><div class="ei">📋</div><p>لا توجد بيانات</p></div>
@@ -2456,10 +2458,14 @@ function renderAllShortsTable(){
   if(!rows.length){
     tbody.innerHTML='';
     if(empty)empty.style.display='block';
+    updateShSelUI();
     return;
   }
   if(empty)empty.style.display='none';
-  tbody.innerHTML=rows.map((r,i)=>`<tr data-row-id="sh_${r.oid}_${r.si}">
+  tbody.innerHTML=rows.map((r,i)=>{
+    const rid=`sh_${r.oid}_${r.si}`;
+    return `<tr data-row-id="${rid}">
+      <td style="text-align:center"><input type="checkbox" class="sh-check" data-sid="${rid}" onchange="onShortCheckChange()" ${selectedShortIds.has(rid)?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary)"></td>
       <td style="text-align:center;color:var(--muted);font-weight:700">${i+1}</td>
       <td style="font-size:12px;color:var(--muted)">${r.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${r.days}</div></td>
       <td>${r.rep}</td><td>${r.co}</td>
@@ -2468,7 +2474,75 @@ function renderAllShortsTable(){
       <td style="text-align:center;font-weight:800;color:var(--red)">${r.qty}</td>
       <td style="font-size:12px;color:var(--muted)">${r.note||'—'}</td>
       <td><button class="btn bbl bsm" onclick="setItemArrived('${r.oid}',${r.si},true)" style="font-size:11px;background:var(--bbg);color:var(--blue);border-color:rgba(199,70,52,.2)">📦 وصلت</button></td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
+  updateShSelUI();
+}
+
+// ===== تحديد صفوف النواقص لطباعة جزئية =====
+let selectedShortIds=new Set();
+function onShortCheckChange(){
+  document.querySelectorAll('.sh-check').forEach(cb=>{
+    const id=cb.dataset.sid;
+    if(cb.checked) selectedShortIds.add(id); else selectedShortIds.delete(id);
+  });
+  updateShSelUI();
+}
+function toggleSelectAllShorts(){
+  const boxes=[...document.querySelectorAll('.sh-check')];
+  const allChecked=boxes.length>0 && boxes.every(cb=>cb.checked);
+  boxes.forEach(cb=>{
+    cb.checked=!allChecked;
+    if(!allChecked) selectedShortIds.add(cb.dataset.sid); else selectedShortIds.delete(cb.dataset.sid);
+  });
+  updateShSelUI();
+}
+function updateShSelUI(){
+  const boxes=[...document.querySelectorAll('.sh-check')];
+  const checkedCount=boxes.filter(cb=>cb.checked).length;
+  const btn=document.getElementById('shSelectAllBtn');
+  if(btn) btn.innerHTML = (boxes.length>0 && checkedCount===boxes.length) ? '⬜ إلغاء التحديد' : '☑️ تحديد الكل';
+  const printBtn=document.getElementById('shPrintSelBtn');
+  const countEl=document.getElementById('shSelCount');
+  if(countEl) countEl.textContent=checkedCount;
+  if(printBtn) printBtn.style.display = checkedCount>0 ? 'inline-flex' : 'none';
+}
+function printSelectedShorts(){
+  const ids=[...selectedShortIds];
+  if(!ids.length){showT('حدد صنف واحد على الأقل',true);return;}
+  const rows=getAllShortRows().filter(r=>ids.includes(`sh_${r.oid}_${r.si}`));
+  if(!rows.length){showT('لم يتم العثور على العناصر المحددة',true);return;}
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+  <title>نواقص محددة</title>
+  <style>
+    body{font-family:Tajawal,Arial,sans-serif;direction:rtl;padding:24px;color:#3C4545;}
+    h2{font-size:18px;margin-bottom:4px;}
+    p{color:#666;font-size:13px;margin-bottom:16px;}
+    table{width:100%;border-collapse:collapse;font-size:13px;}
+    th{background:#E8E4DF;padding:9px 12px;text-align:right;font-size:11px;font-weight:800;color:#555;border-bottom:2px solid #C2D4D4;}
+    td{padding:9px 12px;border-bottom:1px solid #E3DFDA;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    .days{font-size:10px;color:#8A6508;font-weight:700;margin-top:2px}
+    @media print{body{padding:10px;}}
+  </style></head><body>
+  <h2>📋 نواقص محددة</h2>
+  <p>${new Date().toLocaleDateString('ar-SA')} — إجمالي: ${rows.length} صنف محدد</p>
+  <table><thead><tr><th>م</th><th>التاريخ</th><th>المندوب</th><th>العميل</th><th>الصنف</th><th>الشد</th><th>الكمية</th><th>ملاحظات</th></tr></thead><tbody>
+  ${rows.map((r,i)=>`<tr>
+    <td>${i+1}</td>
+    <td style="font-size:11px;color:#888">${r.date}<div class="days">${r.days}</div></td>
+    <td>${r.rep}</td><td>${r.co}</td>
+    <td><strong>${r.name}</strong></td>
+    <td style="text-align:center;color:#888">${r.shad}</td>
+    <td style="text-align:center;font-weight:800;color:#A93226">${r.qty}</td>
+    <td style="font-size:12px;color:#888">${r.note||'—'}</td>
+  </tr>`).join('')}
+  </tbody></table>
+</body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),400);
 }
 
 // ===== القائمة 2: الأصناف الواصلة =====
