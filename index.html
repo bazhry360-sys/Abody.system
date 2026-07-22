@@ -2493,10 +2493,16 @@ function renderAllShortsTable(){
     (r.rep||'').toLowerCase().includes(searchVal)
   );
   const sortVal=document.getElementById('allShortsSort')?.value||'new';
-  rows.sort((a,b)=> sortVal==='old'
-    ? (a.date||'').localeCompare(b.date||'')
-    : (b.date||'').localeCompare(a.date||'')
-  );
+  rows.sort((a,b)=>{
+    const dCmp = sortVal==='old'
+      ? (a.date||'').localeCompare(b.date||'')
+      : (b.date||'').localeCompare(a.date||'');
+    if(dCmp!==0) return dCmp;
+    // مفتاح ثانوي ثابت — يمنع اهتزاز ترتيب الأصناف اللي بنفس التاريخ
+    // بين كل إعادة عرض (وهو سبب إحساس "الفرز ما يشتغل" و"يطبع صنف غلط")
+    const ka=`${a.oid}_${a.si}`, kb=`${b.oid}_${b.si}`;
+    return ka.localeCompare(kb);
+  });
 
   if(!rows.length){
     tbody.innerHTML='';
