@@ -213,12 +213,30 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
 /* KPI CARDS */
 .kpi-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:var(--sh);position:relative;overflow:hidden;transition:all .2s;}
 .kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shl);}
-.kpi-card .kpi-icon{font-size:28px;margin-bottom:10px;}
-.kpi-card .kpi-val{font-size:30px;font-weight:900;font-family:'IBM Plex Mono',monospace;line-height:1;}
-.kpi-card .kpi-lbl{font-size:12px;color:var(--muted);margin-top:5px;font-weight:600;}
-.kpi-card .kpi-sub{font-size:11px;margin-top:4px;font-weight:700;}
+.kpi-card .kpi-icon{font-size:26px;margin-bottom:10px;opacity:.85;}
+.kpi-card .kpi-val{font-size:32px;font-weight:900;font-family:'IBM Plex Mono',monospace;line-height:1;letter-spacing:-.5px;}
+.kpi-card .kpi-lbl{font-size:12px;color:var(--muted);margin-top:6px;font-weight:700;}
+.kpi-card .kpi-sub{font-size:11px;margin-top:3px;font-weight:700;}
 .kpi-card .kpi-bar{position:absolute;bottom:0;left:0;right:0;height:3px;}
 .kpi-card .kpi-trend{position:absolute;top:14px;left:14px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;}
+/* Quick action tiles — Redwood-style bold color bands */
+.qa-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:22px;}
+.qa-tile{border-radius:14px;padding:18px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;color:#fff;}
+.qa-tile:hover{transform:translateY(-3px);box-shadow:0 12px 28px rgba(0,0,0,.18);}
+.qa-tile::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 90% 120%,rgba(255,255,255,.16),transparent 60%);pointer-events:none;}
+.qa-ico{font-size:26px;flex-shrink:0;width:46px;height:46px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:center;}
+.qa-txt{flex:1;min-width:0;}
+.qa-t{font-size:14.5px;font-weight:800;}
+.qa-s{font-size:11.5px;opacity:.85;margin-top:2px;}
+.qa-arrow{font-size:18px;opacity:.7;flex-shrink:0;}
+.qa-red{background:linear-gradient(135deg,#A93A2A,#C74634);}
+.qa-gold{background:linear-gradient(135deg,#8A6508,#B8860B);}
+.qa-green{background:linear-gradient(135deg,#1F5C24,#2E7D32);}
+.qa-blue{background:linear-gradient(135deg,#1F3A5A,#34548A);}
+
+.kpi-spark{display:flex;align-items:flex-end;gap:3px;height:26px;margin-top:12px;}
+.kpi-spark-bar{flex:1;border-radius:2px;opacity:.85;transition:all .3s;min-height:3px;}
+.kpi-card:hover .kpi-spark-bar{opacity:1;}
 .kpi-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
 .kpi-bar-row .kpi-bar-lbl{font-size:12px;font-weight:700;min-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .kpi-bar-row .kpi-bar-wrap{flex:1;background:var(--bg2);border-radius:4px;height:8px;overflow:hidden;}
@@ -299,9 +317,9 @@ nav{flex:1;padding:8px 7px;}
 .panel{display:none;}
 .panel.on{display:block;animation:pgi .25s ease;}
 @keyframes pgi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.ph{margin-bottom:18px;}
-.ph h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;}
-.ph p{font-size:12px;color:var(--muted);margin-top:3px;}
+.ph{margin-bottom:22px;}
+.ph h2{font-family:'Playfair Display',serif;font-size:26px;font-weight:900;letter-spacing:-.3px;}
+.ph p{font-size:12.5px;color:var(--muted);margin-top:5px;font-weight:500;}
 .ph-ln{width:32px;height:3px;background:linear-gradient(90deg,var(--primary),var(--primary2));border-radius:2px;margin-top:6px;}
 
 /* STATS */
@@ -318,13 +336,13 @@ nav{flex:1;padding:8px 7px;}
 /* CARD */
 .card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:15px;box-shadow:var(--sh);}
 .ch{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-.ct{font-size:14px;font-weight:800;display:flex;align-items:center;gap:7px;}
-.cd{width:7px;height:7px;border-radius:50%;}
+.ct{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:9px;letter-spacing:.2px;}
+.cd{width:4px;height:16px;border-radius:3px;flex-shrink:0;}
 
 /* BUTTONS */
 .btn{font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;padding:8px 15px;border-radius:9px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .2s;}
-.bp{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;box-shadow:0 3px 10px rgba(169,58,42,.2);}
-.bp:hover{transform:translateY(-1px);}
+.bp{background:var(--primary2);color:#fff;box-shadow:0 1px 2px rgba(169,58,42,.15);}
+.bp:hover{background:var(--primary);box-shadow:0 2px 6px rgba(169,58,42,.25);}
 .bg{background:var(--bg2);color:var(--text);border:1.5px solid var(--border);}
 .bg:hover{border-color:var(--border2);}
 .br{background:var(--rbg);color:var(--red);border:1px solid rgba(220,38,38,.15);}
@@ -656,6 +674,31 @@ tbody tr:hover{background:var(--pl);}
         <!-- DASHBOARD -->
         <div class="panel on" id="p-dash">
           <div class="ph"><h2>لوحة التحكم</h2><p>نظرة عامة على العمليات</p><div class="ph-ln"></div></div>
+
+          <!-- Quick action tiles (Redwood-style bold color bands) -->
+          <div class="qa-grid">
+            <div class="qa-tile qa-red" onclick="gsGoTo('orders')">
+              <div class="qa-ico">📦</div>
+              <div class="qa-txt"><div class="qa-t">إضافة طلب جديد</div><div class="qa-s">سجّل طلب مندوب أو نواقص</div></div>
+              <div class="qa-arrow">←</div>
+            </div>
+            <div class="qa-tile qa-gold" onclick="gsGoTo('shortscur')">
+              <div class="qa-ico">⚠️</div>
+              <div class="qa-txt"><div class="qa-t">متابعة النواقص</div><div class="qa-s">تتبّع وطباعة الأصناف الناقصة</div></div>
+              <div class="qa-arrow">←</div>
+            </div>
+            <div class="qa-tile qa-green" onclick="gsGoTo('ships')">
+              <div class="qa-ico">🚚</div>
+              <div class="qa-txt"><div class="qa-t">الشحنات</div><div class="qa-s">إدارة شحنات الناقل ومواقعها</div></div>
+              <div class="qa-arrow">←</div>
+            </div>
+            <div class="qa-tile qa-blue" onclick="gsGoTo('report')">
+              <div class="qa-ico">📊</div>
+              <div class="qa-txt"><div class="qa-t">التقارير</div><div class="qa-s">تقرير تنفيذي جاهز للإدارة</div></div>
+              <div class="qa-arrow">←</div>
+            </div>
+          </div>
+
           <div class="sg" id="dSt"></div>
           <div class="dg" id="dCd"></div>
         </div>
@@ -2451,8 +2494,8 @@ function renderAllShortsTable(){
   );
   const sortVal=document.getElementById('allShortsSort')?.value||'new';
   rows.sort((a,b)=> sortVal==='old'
-    ? new Date(a.date) - new Date(b.date)
-    : new Date(b.date) - new Date(a.date)
+    ? (a.date||'').localeCompare(b.date||'')
+    : (b.date||'').localeCompare(a.date||'')
   );
 
   if(!rows.length){
@@ -2465,7 +2508,7 @@ function renderAllShortsTable(){
   tbody.innerHTML=rows.map((r,i)=>{
     const rid=`sh_${r.oid}_${r.si}`;
     return `<tr data-row-id="${rid}">
-      <td style="text-align:center"><input type="checkbox" class="sh-check" data-sid="${rid}" onchange="onShortCheckChange()" ${selectedShortIds.has(rid)?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary)"></td>
+      <td style="text-align:center"><input type="checkbox" class="sh-check" data-sid="${rid}" onchange="onShortCheckChange(this,${JSON.stringify(r).replace(/&/g,'&amp;').replace(/"/g,'&quot;')})" ${selectedShortItems.has(rid)?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary)"></td>
       <td style="text-align:center;color:var(--muted);font-weight:700">${i+1}</td>
       <td style="font-size:12px;color:var(--muted)">${r.date}<div style="font-size:10px;color:var(--gold);font-weight:700;margin-top:2px">${r.days}</div></td>
       <td>${r.rep}</td><td>${r.co}</td>
@@ -2480,38 +2523,45 @@ function renderAllShortsTable(){
 }
 
 // ===== تحديد صفوف النواقص لطباعة جزئية =====
-let selectedShortIds=new Set();
-function onShortCheckChange(){
-  document.querySelectorAll('.sh-check').forEach(cb=>{
-    const id=cb.dataset.sid;
-    if(cb.checked) selectedShortIds.add(id); else selectedShortIds.delete(id);
-  });
+// نخزن نسخة كاملة من بيانات كل صف وقت تحديده (مو بس المعرف)، عشان نضمن
+// إن اللي يتطبع هو بالضبط نفس الصنف اللي حدده — حتى لو تكرر اسم العميل
+// لعدة أصناف، أو لو الجدول أعاد ترتيب نفسه بعد تحديث بيانات حي.
+let selectedShortItems=new Map();
+function onShortCheckChange(cb,rowData){
+  const id=cb.dataset.sid;
+  if(cb.checked) selectedShortItems.set(id,rowData);
+  else selectedShortItems.delete(id);
   updateShSelUI();
 }
 function toggleSelectAllShorts(){
-  const boxes=[...document.querySelectorAll('.sh-check')];
+  const boxes=[...document.querySelectorAll('#allShortsTbody .sh-check')];
   const allChecked=boxes.length>0 && boxes.every(cb=>cb.checked);
+  const rows=getAllShortRows().filter(r=>!r.arrived);
   boxes.forEach(cb=>{
     cb.checked=!allChecked;
-    if(!allChecked) selectedShortIds.add(cb.dataset.sid); else selectedShortIds.delete(cb.dataset.sid);
+    const id=cb.dataset.sid;
+    if(!allChecked){
+      const match=rows.find(r=>`sh_${r.oid}_${r.si}`===id);
+      if(match) selectedShortItems.set(id,match);
+    } else {
+      selectedShortItems.delete(id);
+    }
   });
   updateShSelUI();
 }
 function updateShSelUI(){
-  const boxes=[...document.querySelectorAll('.sh-check')];
+  const boxes=[...document.querySelectorAll('#allShortsTbody .sh-check')];
   const checkedCount=boxes.filter(cb=>cb.checked).length;
   const btn=document.getElementById('shSelectAllBtn');
   if(btn) btn.innerHTML = (boxes.length>0 && checkedCount===boxes.length) ? '⬜ إلغاء التحديد' : '☑️ تحديد الكل';
   const printBtn=document.getElementById('shPrintSelBtn');
   const countEl=document.getElementById('shSelCount');
-  if(countEl) countEl.textContent=checkedCount;
-  if(printBtn) printBtn.style.display = checkedCount>0 ? 'inline-flex' : 'none';
+  if(countEl) countEl.textContent=selectedShortItems.size;
+  if(printBtn) printBtn.style.display = selectedShortItems.size>0 ? 'inline-flex' : 'none';
 }
 function printSelectedShorts(){
-  const ids=[...selectedShortIds];
-  if(!ids.length){showT('حدد صنف واحد على الأقل',true);return;}
-  const rows=getAllShortRows().filter(r=>ids.includes(`sh_${r.oid}_${r.si}`));
-  if(!rows.length){showT('لم يتم العثور على العناصر المحددة',true);return;}
+  const rows=[...selectedShortItems.values()];
+  if(!rows.length){showT('حدد صنف واحد على الأقل',true);return;}
   const w=window.open('','_blank');
   w.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
   <title>نواقص محددة</title>
@@ -4695,6 +4745,17 @@ function renderKPI(){
   // Most missing item
   const topItem=Object.entries(itemMap).sort((a,b)=>b[1].count-a[1].count)[0];
 
+  // ===== 7-DAY ACTIVITY SPARKLINE (per KPI card) =====
+  const sparkDays=[...Array(7)].map((_,i)=>{
+    const d=new Date(); d.setDate(d.getDate()-(6-i));
+    const ds=d.toISOString().split('T')[0];
+    return orders.filter(o=>o.source!=='warehouse' && o.status==='missing' && o.date===ds).length;
+  });
+  const sparkMax=Math.max(...sparkDays,1);
+  function kpiSpark(color){
+    return `<div class="kpi-spark">${sparkDays.map(v=>`<div class="kpi-spark-bar" style="height:${Math.max(8,(v/sparkMax)*100)}%;background:${color}"></div>`).join('')}</div>`;
+  }
+
   // ===== KPI CARDS =====
   const kpiData=[
     {icon:'⚠️',val:`${missRate}%`,lbl:'نسبة الطلبات بنواقص',sub:`${totalMiss} من ${totalOrders} طلب`,color:'var(--red)',trend:missRate>20?'▲ مرتفع':'✓ طبيعي',trendColor:missRate>20?'var(--red)':'var(--green)'},
@@ -4714,6 +4775,7 @@ function renderKPI(){
         <div class="kpi-val" style="color:${k.color}">${k.val}</div>
         <div class="kpi-lbl">${k.lbl}</div>
         ${k.sub?`<div class="kpi-sub" style="color:${k.color}80">${k.sub}</div>`:''}
+        ${kpiSpark(k.color)}
         <div class="kpi-bar" style="background:${k.color}"></div>
       </div>`).join('');
   }
